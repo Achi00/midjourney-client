@@ -2,8 +2,13 @@
 // import { sendAudioToServer } from "@/utils";
 import toast, { Toaster } from "react-hot-toast";
 import React, { useState } from "react";
+import { sendAudioToServer } from "@/utils";
 
-const SpeechToText = (props: any) => {
+const SpeechToText = ({
+  onTranscription,
+}: {
+  onTranscription: (transcription: string) => void;
+}) => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
     null
   );
@@ -21,6 +26,7 @@ const SpeechToText = (props: any) => {
               t.visible ? "animate-enter" : "animate-leave"
             }`}
           >
+            <div className="blinking-red-dot"></div>
             <div className="visualizer-container">
               <div className="visualizer-bar"></div>
               <div className="visualizer-bar"></div>
@@ -58,24 +64,6 @@ const SpeechToText = (props: any) => {
     }
   };
 
-  async function sendAudioToServer(audioBlob: Blob) {
-    const formData = new FormData();
-    formData.append("audioFile", audioBlob, "recording.webm");
-
-    try {
-      const response = await fetch("http://localhost:8080/transcribe-audio", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      console.log("Transcription:", data.transcription);
-      // Handle the transcription data as needed
-      props.onTranscription(data.transcription);
-    } catch (error) {
-      console.error("Error sending audio to the server:", error);
-    }
-  }
-
   const stopRecording = () => {
     if (mediaRecorder) {
       mediaRecorder.ondataavailable = (event) => {
@@ -87,7 +75,9 @@ const SpeechToText = (props: any) => {
             });
             if (audioBlob.size > 0) {
               console.log("Audio Blob created", audioBlob);
-              sendAudioToServer(audioBlob).catch(console.error);
+              // sendAudioToServer(audioBlob, onTranscription).catch(
+              //   console.error
+              // );
               setIsRecording(false);
             } else {
               console.error("No audio recorded");
@@ -139,6 +129,10 @@ const SpeechToText = (props: any) => {
             </div>
           </button>
           <p>{isRecording ? "Stop Recording" : "Use Mic"}</p>
+        </div>
+        <div className="container">
+          <div className="dot"></div>
+          <span className="text">Blinking Dot</span>
         </div>
       </div>
       {isRecording && <p>Recording...</p>}
