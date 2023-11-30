@@ -1,27 +1,58 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import SpeechToText from "./SpeechToText";
+import Link from "next/link";
+import TermsModal from "./TermsModal";
 
 interface WebSocketMessage {
   action: string;
   status?: string;
   progress?: number;
   message?: string;
-  cloudinaryUrl?: string;
+  imageUrl?: string;
 }
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
   const [prompt, setPrompt] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [errorCode, setErrorCode] = useState("");
-  const [progressMessage, setProgressMessage] = useState("");
+  const [passcode, setPasscode] = useState("");
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
-  const toastId = useRef<string | undefined>(undefined);
+  const passcodeInputRef = useRef<HTMLInputElement>(null);
+
+  const verifyPasscode = async () => {
+    try {
+      if (!passcode) {
+        toast.error("Please enter password");
+      } else {
+        const response = await fetch("http://localhost:8080/verify-passcode", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ passcode }),
+        });
+        if (response.ok) {
+          setIsAuthorized(true);
+          if (passcodeInputRef.current) {
+            passcodeInputRef.current.style.border = "initial"; // Reset to initial style
+          }
+          toast.success("Access granted");
+        } else {
+          toast.error("Access denied");
+        }
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("An error occurred");
+    }
+  };
 
   // useEffect(() => {
   //   const ws = new WebSocket("ws://localhost:8080");
@@ -87,8 +118,8 @@ const Hero = () => {
     if (response.ok) {
       const data = await response.json();
 
-      if (data.cloudinaryUrl) {
-        setResultImage(data.cloudinaryUrl);
+      if (data.imageUrl) {
+        setResultImage(data.imageUrl);
         toast.dismiss(); // Dismiss the loading toast
         toast.success("Image generation completed!");
       } else {
@@ -115,7 +146,16 @@ const Hero = () => {
       }
     }
   };
+  // check name and email
+  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+  };
 
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+  };
+
+  // chack image
   const handleImageChange = (e: any) => {
     setImage(e.target.files[0]);
     toast.success("Image selected");
@@ -127,16 +167,27 @@ const Hero = () => {
   };
 
   const handleSubmit = async () => {
-    toast.loading("Processing your image...");
-    if (!image || !prompt) {
-      console.error("Image and prompt are required");
-      toast.error("Image and prompt are required");
+    // Check if all required fields are filled
+    if (!name || !email || !image || !prompt) {
+      toast.error("All fields are required");
       return;
     }
+
+    // Simple email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email address");
+      return;
+    }
+
+    // Only show the loading toast after passing the validation checks
+    toast.loading("Processing your image...");
 
     const formData = new FormData();
     formData.append("userImage", image);
     formData.append("prompt", prompt);
+    formData.append("name", name);
+    formData.append("email", email);
 
     try {
       const response = await fetch(
@@ -148,20 +199,9 @@ const Hero = () => {
       );
 
       await handleResponse(response);
-
-      if (response.ok) {
-        const data = await response.json();
-
-        if (data.cloudinaryUrl) {
-          setResultImage(data.cloudinaryUrl);
-          toast.dismiss(); // Dismiss the loading toast
-          toast.success("Image generation completed!");
-        } else {
-          console.error("Cloudinary URL not found in response");
-        }
-      }
     } catch (error) {
       console.error("Request failed:", error);
+      toast.error("An error occurred while processing your request.");
     }
   };
 
@@ -172,6 +212,14 @@ const Hero = () => {
   useEffect(() => {
     console.log("Result Image updated to:", resultImage); // Log on state update
   }, [resultImage]);
+
+  const authorizeError = () => {
+    toast.error("Please authorize first");
+    if (passcodeInputRef.current) {
+      passcodeInputRef.current.style.border = "2px solid red";
+      passcodeInputRef.current.focus();
+    }
+  };
 
   return (
     <div className="w-full flex justify-center items-center flex-col gap-[3vmin]">
@@ -184,6 +232,28 @@ const Hero = () => {
           <div className="alert alert-danger">{error}</div>
         </div>
       )}
+      {/* password */}
+      <div className="flex flex-col items-center justify-center gap-3">
+        <h1>Please verify password</h1>
+        <div className="flex gap-6 h-15">
+          <input
+            type="password"
+            ref={passcodeInputRef}
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+            value={passcode}
+            onChange={(e) => setPasscode(e.target.value)}
+          />
+          <button
+            className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg text-sm"
+            onClick={verifyPasscode}
+          >
+            Verify Password
+          </button>
+        </div>
+      </div>
+      <div className="flex">
+        <TermsModal />
+      </div>
       {/* upload field */}
       <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
         <div className="flex items-center justify-center w-full">
@@ -225,17 +295,17 @@ const Hero = () => {
                 />
               </svg>
               {image ? (
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold">Click Again</span> to upload
                   or drag and drop
                 </p>
               ) : (
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
                   <span className="font-semibold">Click to upload</span> or drag
                   and drop
                 </p>
               )}
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs p-2 text-gray-500 dark:text-gray-400">
                 SVG, PNG or JPG (Image should have good quality)
               </p>
             </div>
@@ -248,7 +318,7 @@ const Hero = () => {
           </label>
         </div>
         {/* prompt */}
-        <div className="flex justify-center items-center w-full gap-4 p-3">
+        <div className="flex justify-center xl:flex-row lg:flex-row md:flex-row sm:flex-row xs:flex-col items-center w-full gap-4 p-3">
           <input
             type="text"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
@@ -257,13 +327,42 @@ const Hero = () => {
             placeholder="Enter prompt"
           />
           {/* microphone */}
-          <SpeechToText onTranscription={handleTranscription} />
+          <SpeechToText
+            onTranscription={handleTranscription}
+            isAuthorized={isAuthorized}
+          />
+        </div>
+        {/* name & email fields */}
+        <div className="flex xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
+          <div className="flex flex-col w-full">
+            <p className="text-lg p-2">Name</p>
+            <input
+              type="text"
+              placeholder="Enter your Name..."
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+              value={name}
+              onChange={handleNameChange}
+            />
+          </div>
+          <div className="flex flex-col w-full">
+            <p className="text-lg p-2">Email</p>
+            <input
+              type="text"
+              placeholder="Enter your Email Address..."
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+              value={email}
+              onChange={handleEmailChange}
+            />
+          </div>
         </div>
         <button
-          className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
-          onClick={handleSubmit}
+          className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
+            !isAuthorized ? "cursor-not-allowed	" : "cursor-pointer"
+          }`}
+          onClick={isAuthorized ? handleSubmit : authorizeError}
+          // disabled={!isAuthorized}
         >
-          Submit
+          {isAuthorized ? "Submit" : "Authorize First"}
         </button>
         {resultImage && (
           <img

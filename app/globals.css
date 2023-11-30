@@ -156,3 +156,22 @@ body {
     opacity: 0;
   }
 }
+
+.cache {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  background-image: inherit;
+  background-size: cover;
+
+  filter: blur(5px);
+  -webkit-filter: blur(5px) brightness(0.5);
+  -webkit-mask-image: radial-gradient(
+    ellipse farthest-side at bottom left,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
