@@ -2,16 +2,7 @@
 import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import SpeechToText from "./SpeechToText";
-import Link from "next/link";
 import TermsModal from "./TermsModal";
-
-interface WebSocketMessage {
-  action: string;
-  status?: string;
-  progress?: number;
-  message?: string;
-  imageUrl?: string;
-}
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -33,11 +24,14 @@ const Hero = () => {
       if (!passcode) {
         toast.error("Please enter password");
       } else {
-        const response = await fetch("http://localhost:8080/verify-passcode", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ passcode }),
-        });
+        const response = await fetch(
+          "https://abovedigital-1696444393502.ew.r.appspot.com/verify-passcode",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ passcode }),
+          }
+        );
         if (response.ok) {
           setIsAuthorized(true);
           if (passcodeInputRef.current) {
@@ -54,95 +48,44 @@ const Hero = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const ws = new WebSocket("ws://localhost:8080");
-
-  //   ws.onopen = () => {
-  //     console.log("Connected to WebSocket");
-  //     // Initialize the process by dismissing any existing toasts
-  //     toast.dismiss();
-  //   };
-
-  //   ws.onmessage = (event) => {
-  //     const message = JSON.parse(event.data);
-  //     console.log("Received:", message);
-
-  //     // Handle different WebSocket messages
-  //     switch (message.action) {
-  //       case "processing":
-  //         // Check for a specific status if needed, e.g., generating_image, face_swapping
-  //         if (message.status === "generating_image") {
-  //           // Update or show toast for generating image
-  //           toastId.current = toast.loading(message.message, {
-  //             id: toastId.current,
-  //           });
-  //         } else if (message.status === "face_swapping") {
-  //           // Update or show toast for face swapping
-  //           toastId.current = toast.loading(message.message, {
-  //             id: toastId.current,
-  //           });
-  //         }
-  //         break;
-  //       case "completed":
-  //         // When completed, show a success toast and dismiss any loading toast
-  //         toast.success(message.message, { id: toastId.current });
-  //         toast.dismiss(toastId.current); // Make sure to dismiss after showing success
-  //         break;
-  //       case "error":
-  //         // Show error toast
-  //         toast.error(message.message, { id: toastId.current });
-  //         break;
-  //       default:
-  //         // Handle any other messages that might be informative but not necessarily errors
-  //         break;
-  //     }
-  //   };
-
-  //   ws.onerror = (error) => {
-  //     console.error("WebSocket error:", error);
-  //     toast.error("An error occurred with the WebSocket connection.");
-  //   };
-
-  //   ws.onclose = () => {
-  //     console.log("Disconnected from WebSocket");
-  //     // Consider whether you want to show a toast on normal disconnection
-  //   };
-
-  //   return () => {
-  //     ws.close();
-  //   };
-  // }, []);
-
   // Function to handle the API response
   const handleResponse = async (response: any) => {
     if (response.ok) {
       const data = await response.json();
-
       if (data.imageUrl) {
         setResultImage(data.imageUrl);
         toast.dismiss(); // Dismiss the loading toast
         toast.success("Image generation completed!");
       } else {
-        console.error("Cloudinary URL not found in response");
+        console.error("URL not found in response");
+        toast.error("An error occurred while processing the image.");
       }
     } else {
       toast.dismiss(); // Dismiss the loading toast before displaying the error message
-      const error = await response.json();
+      const errorData = await response.json();
 
-      if (error.error === "Each image should have exactly one face.") {
-        toast.error("Error: Each image should have exactly one face.");
-      } else if (
-        error.error ===
-        "Multiple faces detected. Only single-face detection is supported."
-      ) {
-        toast.error(
-          "Error: Multiple faces detected. Only single-face detection is supported."
-        );
-      } else if (error.error === "No face detected") {
-        toast.error("Error: No face detected in the uploaded image.");
-      } else {
-        console.error("Unexpected error:", error);
-        toast.error("An unexpected error occurred. Please try again later.");
+      // Check for nested error structure
+      const errorMessage =
+        errorData.error && errorData.error.error
+          ? errorData.error.error
+          : errorData.error;
+
+      switch (errorMessage) {
+        case "Each image should have exactly one face.":
+          toast.error("Error: Each image should have exactly one face.");
+          break;
+        case "Multiple faces detected. Only single-face detection is supported.":
+          toast.error(
+            "Error: Multiple faces detected. Only single-face detection is supported."
+          );
+          break;
+        case "No face detected":
+          toast.error("Error: No face detected in the uploaded image.");
+          break;
+        default:
+          console.error("Unexpected error:", errorData);
+          toast.error("An unexpected error occurred. Please try again later.");
+          break;
       }
     }
   };
@@ -159,7 +102,6 @@ const Hero = () => {
   const handleImageChange = (e: any) => {
     setImage(e.target.files[0]);
     toast.success("Image selected");
-    console.log("Image selected:", e.target.files[0]);
   };
 
   const handlePromptChange = (e: any) => {
@@ -191,7 +133,7 @@ const Hero = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8080/generate-and-swap-face",
+        "https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
         {
           method: "POST",
           body: formData,
@@ -209,10 +151,6 @@ const Hero = () => {
     setPrompt(transcriptionText);
   };
 
-  useEffect(() => {
-    console.log("Result Image updated to:", resultImage); // Log on state update
-  }, [resultImage]);
-
   const authorizeError = () => {
     toast.error("Please authorize first");
     if (passcodeInputRef.current) {
@@ -227,6 +165,35 @@ const Hero = () => {
       <h1 className="xl:text-3xl lg:text-3xl md:text-2xl sm:text-xl xs:text-lg font-bold text-violet-800">
         Face Swap App
       </h1>
+      <h1 className="xl:text-md lg:text-md md:text-md sm:text-sm xs:text-sm font-slim text-violet-800">
+        Generate image in 60 seconds
+      </h1>
+      <div className="w-1/4">
+        <div
+          role="alert"
+          className="relative flex w-full px-4 py-4 text-base text-violet-800 rounded-lg border-2 border-violet-800 font-regular"
+        >
+          <div className="shrink-0">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="2"
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
+              ></path>
+            </svg>
+          </div>
+          <div className="ml-3 mr-12">
+            Make sure nothing is covering your face
+          </div>
+        </div>
+      </div>
       {error && (
         <div>
           <div className="alert alert-danger">{error}</div>

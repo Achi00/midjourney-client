@@ -48,13 +48,11 @@ const SpeechToText = ({
       );
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const newMediaRecorder = new MediaRecorder(stream);
-      console.log(`Recording MIME type: ${newMediaRecorder.mimeType}`);
       newMediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           setAudioChunks((prevAudioChunks) => [...prevAudioChunks, event.data]);
-          console.log("Chunk of audio data received", event.data);
         } else {
-          console.log("No audio chunks");
+          toast.error("Cant find audio data");
         }
       };
 
@@ -76,7 +74,6 @@ const SpeechToText = ({
               type: "audio/webm;codecs=opus",
             });
             if (audioBlob.size > 0) {
-              console.log("Audio Blob created", audioBlob);
               sendAudioToServer(audioBlob, onTranscription).catch(
                 console.error
               );
@@ -92,7 +89,7 @@ const SpeechToText = ({
       setIsRecording(false);
       mediaRecorder.stop();
     } else {
-      console.log("MediaRecorder not initialized");
+      toast.error("MediaRecorder not initialized");
     }
   };
 

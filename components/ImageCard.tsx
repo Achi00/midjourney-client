@@ -49,19 +49,9 @@ const ImageCard = ({ data }: ImageCardProps) => {
                 {item.prompt && (
                   <div className="flex justify-between w-full items-center px-2">
                     <p className="text-white text-lg font-bold">
-                      Prompt: {item.prompt}
+                      {item.prompt}
                     </p>
                     <CopyIconWithHoverCard prompt={item?.prompt} />
-                    {/* <div className="relative group inline-block">
-                    <FaCopy className="cursor-pointer text-xl" />
-
-                    <div className="absolute z-50 opacity-0 transition-opacity duration-300 ease-in-out bg-white p-3 rounded shadow-lg w-48 group-hover:opacity-100 -left-10 top-10">
-                      <div className="flex items-center space-x-2">
-                        <FaInfoCircle />
-                        <span>Copy to clipboard</span>
-                      </div>
-                    </div>
-                  </div> */}
                   </div>
                 )}
               </div>

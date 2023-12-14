@@ -18,10 +18,13 @@ export async function sendAudioToServer(
   formData.append("audioFile", audioBlob, "recording.webm");
 
   try {
-    const response = await fetch("http://localhost:8080/transcribe-audio", {
-      method: "POST",
-      body: formData,
-    });
+    const response = await fetch(
+      "https://abovedigital-1696444393502.ew.r.appspot.com/transcribe-audio",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
 
     if (!response.ok) {
       throw new Error(
@@ -30,7 +33,6 @@ export async function sendAudioToServer(
     }
 
     const data = await response.json();
-    console.log("Transcription:", data.transcription);
     // Handle the transcription data as needed
     onTranscription(data.transcription);
   } catch (error) {
