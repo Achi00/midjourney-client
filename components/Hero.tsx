@@ -11,11 +11,10 @@ const Hero = () => {
   const [email, setEmail] = useState<string>("");
 
   const [resultImage, setResultImage] = useState<string | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [passcode, setPasscode] = useState("");
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(true);
+  const [step, setStep] = useState(1);
 
   const passcodeInputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +45,15 @@ const Hero = () => {
       console.error("Error:", error);
       toast.error("An error occurred");
     }
+  };
+
+  // Handlers for step transitions
+  const handleNext = () => {
+    if (step < 3) setStep(step + 1);
+  };
+
+  const handleBack = () => {
+    if (step > 1) setStep(step - 1);
   };
 
   // Function to handle the API response
@@ -168,10 +176,10 @@ const Hero = () => {
       <h1 className="xl:text-md lg:text-md md:text-md sm:text-sm xs:text-sm font-slim text-violet-800">
         Generate image in 60 seconds
       </h1>
-      <div className="w-1/4">
+      <div className="xl:w-1/4 lg:w-1/4 md:w-1/2 sm:w-1/2 xs:w-3/4 flex items-center justify-center">
         <div
           role="alert"
-          className="relative flex w-full px-4 py-4 text-base text-violet-800 rounded-lg border-2 border-violet-800 font-regular"
+          className="relative flex items-center justify-center w-full px-1 py-4 text-base text-violet-800 rounded-lg border-2 border-violet-800 font-regular"
         >
           <div className="shrink-0">
             <svg
@@ -189,7 +197,7 @@ const Hero = () => {
               ></path>
             </svg>
           </div>
-          <div className="ml-3 mr-12">
+          <div className="ml-3 mr-12 xl:text-md lg:text-md md:lg:text-sm sm:lg:text-xs xs:text-xs">
             Make sure nothing is covering your face
           </div>
         </div>
@@ -200,7 +208,7 @@ const Hero = () => {
         </div>
       )}
       {/* password */}
-      <div className="flex flex-col items-center justify-center gap-3">
+      {/* <div className="flex flex-col items-center justify-center gap-3">
         <h1>Please verify password</h1>
         <div className="flex gap-6 h-15">
           <input
@@ -217,120 +225,119 @@ const Hero = () => {
             Verify Password
           </button>
         </div>
-      </div>
-      <div className="flex">
+      </div> */}
+      <div className="flex text-center">
         <TermsModal />
       </div>
       {/* upload field */}
       <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
-        <div className="flex items-center justify-center w-full">
-          <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100">
-            {image && (
-              <div className="flex gap-3">
+        {/* upload image */}
+        {step === 1 && (
+          <div className="flex fadeIn items-center justify-center w-full">
+            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100">
+              {image && (
+                <div className="flex gap-3">
+                  <svg
+                    className="w-6 h-6 text-violet-800 dark:text-white"
+                    aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 21 21"
+                  >
+                    <path
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="m6.072 10.072 2 2 6-4m3.586 4.314.9-.9a2 2 0 0 0 0-2.828l-.9-.9a2 2 0 0 1-.586-1.414V5.072a2 2 0 0 0-2-2H13.8a2 2 0 0 1-1.414-.586l-.9-.9a2 2 0 0 0-2.828 0l-.9.9a2 2 0 0 1-1.414.586H5.072a2 2 0 0 0-2 2v1.272a2 2 0 0 1-.586 1.414l-.9.9a2 2 0 0 0 0 2.828l.9.9a2 2 0 0 1 .586 1.414v1.272a2 2 0 0 0 2 2h1.272a2 2 0 0 1 1.414.586l.9.9a2 2 0 0 0 2.828 0l.9-.9a2 2 0 0 1 1.414-.586h1.272a2 2 0 0 0 2-2V13.8a2 2 0 0 1 .586-1.414Z"
+                    />
+                  </svg>
+                  <p className="text-violet-600 font-bold">Image Uploaded</p>
+                </div>
+              )}
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg
-                  className="w-6 h-6 text-violet-800 dark:text-white"
+                  className="w-8 h-8 mb-4 text-violet-600 dark:text-violet-900"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
-                  viewBox="0 0 21 21"
+                  viewBox="0 0 20 16"
                 >
                   <path
                     stroke="currentColor"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
-                    d="m6.072 10.072 2 2 6-4m3.586 4.314.9-.9a2 2 0 0 0 0-2.828l-.9-.9a2 2 0 0 1-.586-1.414V5.072a2 2 0 0 0-2-2H13.8a2 2 0 0 1-1.414-.586l-.9-.9a2 2 0 0 0-2.828 0l-.9.9a2 2 0 0 1-1.414.586H5.072a2 2 0 0 0-2 2v1.272a2 2 0 0 1-.586 1.414l-.9.9a2 2 0 0 0 0 2.828l.9.9a2 2 0 0 1 .586 1.414v1.272a2 2 0 0 0 2 2h1.272a2 2 0 0 1 1.414.586l.9.9a2 2 0 0 0 2.828 0l.9-.9a2 2 0 0 1 1.414-.586h1.272a2 2 0 0 0 2-2V13.8a2 2 0 0 1 .586-1.414Z"
+                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
                   />
                 </svg>
-                <p className="text-violet-600 font-bold">Image Uploaded</p>
+                {image ? (
+                  <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click Again</span> to upload
+                    or drag and drop
+                  </p>
+                ) : (
+                  <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span className="font-semibold">Click to upload</span> or
+                    drag and drop
+                  </p>
+                )}
+                <p className="text-xs p-2 text-gray-500 dark:text-gray-400">
+                  SVG, PNG or JPG (Image should have good quality)
+                </p>
               </div>
-            )}
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-              <svg
-                className="w-8 h-8 mb-4 text-violet-600 dark:text-violet-900"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 16"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                />
-              </svg>
-              {image ? (
-                <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Click Again</span> to upload
-                  or drag and drop
-                </p>
-              ) : (
-                <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Click to upload</span> or drag
-                  and drop
-                </p>
-              )}
-              <p className="text-xs p-2 text-gray-500 dark:text-gray-400">
-                SVG, PNG or JPG (Image should have good quality)
-              </p>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </label>
+          </div>
+        )}
+        {/* enter prompt */}
+        {step === 2 && (
+          <div className="flex fadeIn justify-center xl:flex-row lg:flex-row md:flex-row sm:flex-row xs:flex-col items-center w-full gap-4 p-3">
+            <input
+              type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+              value={prompt}
+              onChange={handlePromptChange}
+              placeholder="Enter prompt"
+            />
+            {/* microphone */}
+            <SpeechToText
+              onTranscription={handleTranscription}
+              isAuthorized={isAuthorized}
+            />
+          </div>
+        )}
+        {/* enter name & email */}
+        {step === 3 && (
+          <div className="flex fadeIn xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
+            <div className="flex flex-col w-full">
+              <p className="text-lg p-2">Name</p>
+              <input
+                type="text"
+                placeholder="Enter your Name..."
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+                value={name}
+                onChange={handleNameChange}
+              />
             </div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="hidden"
-            />
-          </label>
-        </div>
-        {/* prompt */}
-        <div className="flex justify-center xl:flex-row lg:flex-row md:flex-row sm:flex-row xs:flex-col items-center w-full gap-4 p-3">
-          <input
-            type="text"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-            value={prompt}
-            onChange={handlePromptChange}
-            placeholder="Enter prompt"
-          />
-          {/* microphone */}
-          <SpeechToText
-            onTranscription={handleTranscription}
-            isAuthorized={isAuthorized}
-          />
-        </div>
-        {/* name & email fields */}
-        <div className="flex xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
-          <div className="flex flex-col w-full">
-            <p className="text-lg p-2">Name</p>
-            <input
-              type="text"
-              placeholder="Enter your Name..."
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-              value={name}
-              onChange={handleNameChange}
-            />
+            <div className="flex flex-col w-full">
+              <p className="text-lg p-2">Email</p>
+              <input
+                type="text"
+                placeholder="Enter your Email Address..."
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+                value={email}
+                onChange={handleEmailChange}
+              />
+            </div>
           </div>
-          <div className="flex flex-col w-full">
-            <p className="text-lg p-2">Email</p>
-            <input
-              type="text"
-              placeholder="Enter your Email Address..."
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-              value={email}
-              onChange={handleEmailChange}
-            />
-          </div>
-        </div>
-        <button
-          className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
-            !isAuthorized ? "cursor-not-allowed	" : "cursor-pointer"
-          }`}
-          onClick={isAuthorized ? handleSubmit : authorizeError}
-          // disabled={!isAuthorized}
-        >
-          {isAuthorized ? "Submit" : "Authorize First"}
-        </button>
+        )}
+
         {resultImage && (
           <img
             className="rounded-lg border-3 border-violet-950"
@@ -338,6 +345,36 @@ const Hero = () => {
             src={resultImage}
             alt="Result"
           />
+        )}
+      </div>
+      <div className="flex gap-5">
+        {/* Navigation Buttons */}
+        {step > 1 && (
+          <button
+            className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
+            onClick={handleBack}
+          >
+            Back
+          </button>
+        )}
+        {step < 3 && (
+          <button
+            className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
+            onClick={handleNext}
+          >
+            Next
+          </button>
+        )}
+        {step === 3 && (
+          <button
+            className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
+              !isAuthorized ? "cursor-not-allowed	" : "cursor-pointer"
+            }`}
+            onClick={isAuthorized ? handleSubmit : authorizeError}
+            // disabled={!isAuthorized}
+          >
+            {isAuthorized ? "Submit" : "Authorize First"}
+          </button>
         )}
       </div>
     </div>

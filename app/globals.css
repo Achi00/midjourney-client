@@ -175,3 +175,17 @@ body {
     rgba(0, 0, 0, 0) 100%
   );
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  animation: fadeIn ease-in 1;
+  animation-duration: 0.5s; /* or however long you want the animation to be */
+}
