@@ -6,14 +6,19 @@ import TermsModal from "./TermsModal";
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
+  // for user image preview
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  // enter fields
   const [prompt, setPrompt] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
-
+  // final image state
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [error, setError] = useState("");
+  // easy authentication
   const [passcode, setPasscode] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(true);
+  // steps for show previous or next jsx element
   const [step, setStep] = useState(1);
 
   const passcodeInputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +54,7 @@ const Hero = () => {
 
   // Handlers for step transitions
   const handleNext = () => {
-    if (step < 3) setStep(step + 1);
+    if (step < 4) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -107,9 +112,13 @@ const Hero = () => {
   };
 
   // chack image
-  const handleImageChange = (e: any) => {
-    setImage(e.target.files[0]);
-    toast.success("Image selected");
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setImage(file);
+      setImageUrl(URL.createObjectURL(file));
+      toast.success("Image selected");
+    }
   };
 
   const handlePromptChange = (e: any) => {
@@ -231,8 +240,25 @@ const Hero = () => {
       </div>
       {/* upload field */}
       <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
-        {/* upload image */}
+        {/* enter prompt */}
         {step === 1 && (
+          <div className="flex fadeIn justify-center xl:flex-row lg:flex-row md:flex-row sm:flex-row xs:flex-col items-center w-full gap-4 p-3">
+            <input
+              type="text"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+              value={prompt}
+              onChange={handlePromptChange}
+              placeholder="Enter prompt"
+            />
+            {/* microphone */}
+            <SpeechToText
+              onTranscription={handleTranscription}
+              isAuthorized={isAuthorized}
+            />
+          </div>
+        )}
+        {/* upload image */}
+        {step === 2 && (
           <div className="flex fadeIn items-center justify-center w-full">
             <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100">
               {image && (
@@ -295,25 +321,25 @@ const Hero = () => {
             </label>
           </div>
         )}
-        {/* enter prompt */}
-        {step === 2 && (
-          <div className="flex fadeIn justify-center xl:flex-row lg:flex-row md:flex-row sm:flex-row xs:flex-col items-center w-full gap-4 p-3">
-            <input
-              type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-              value={prompt}
-              onChange={handlePromptChange}
-              placeholder="Enter prompt"
+
+        {/* user image preview */}
+        {step === 3 &&
+          (imageUrl ? (
+            <img
+              src={imageUrl}
+              alt="Preview"
+              style={{ maxWidth: "100%", maxHeight: "300px" }}
+              className="rounded-md border border-violet-700"
             />
-            {/* microphone */}
-            <SpeechToText
-              onTranscription={handleTranscription}
-              isAuthorized={isAuthorized}
-            />
-          </div>
-        )}
+          ) : (
+            <div className="flex justify-center items-center bg-white rounded-md w-1/4 h-[150px] border border-violet-700 border-dashed">
+              <p className="font-light text-black">
+                Your image preview here...
+              </p>
+            </div>
+          ))}
         {/* enter name & email */}
-        {step === 3 && (
+        {step === 4 && (
           <div className="flex fadeIn xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
             <div className="flex flex-col w-full">
               <p className="text-lg p-2">Name</p>
@@ -357,7 +383,7 @@ const Hero = () => {
             Back
           </button>
         )}
-        {step < 3 && (
+        {step < 4 && (
           <button
             className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
             onClick={handleNext}
@@ -365,7 +391,7 @@ const Hero = () => {
             Next
           </button>
         )}
-        {step === 3 && (
+        {step === 4 && (
           <button
             className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
               !isAuthorized ? "cursor-not-allowed	" : "cursor-pointer"
