@@ -107,7 +107,7 @@ const SpeechToText = ({
         <Toaster />
         <div className="flex gap-1 text-center items-center justify-center">
           {isAuthorized ? (
-            <>
+            <div className="flex flex-col">
               <button onClick={toggleRecording}>
                 <div className="bg-violet-500 cursor-pointer hover:bg-violet-700 p-2 rounded-lg">
                   <svg
@@ -129,8 +129,8 @@ const SpeechToText = ({
                   </svg>
                 </div>
               </button>
-              {/* <p>{isRecording ? "Stop Recording" : "Use Mic"}</p> */}
-            </>
+              <p className="font-bold">{isRecording ? "Stop" : "Start"}</p>
+            </div>
           ) : null}
         </div>
       </div>

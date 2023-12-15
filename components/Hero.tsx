@@ -5,6 +5,8 @@ import SpeechToText from "./SpeechToText";
 import TermsModal from "./TermsModal";
 import Image from "next/image";
 import Logo from "../utils/Logo.png";
+import ShareImage from "./ShareImage";
+import { FacebookShareButton } from "next-share";
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -12,8 +14,8 @@ const Hero = () => {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   // enter fields
   const [prompt, setPrompt] = useState<string>("");
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("test");
+  const [email, setEmail] = useState<string>("test@gmail.com");
   // final image state
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -24,6 +26,8 @@ const Hero = () => {
   const [step, setStep] = useState(1);
   // input and microphone togle state
   const [isUsingSpeech, setIsUsingSpeech] = useState(false);
+  // show audio text
+  const [showAudio, setShoWAudio] = useState("");
 
   const passcodeInputRef = useRef<HTMLInputElement>(null);
 
@@ -112,13 +116,13 @@ const Hero = () => {
     }
   };
   // check name and email
-  const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-  };
+  // const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   setName(e.target.value);
+  // };
 
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
+  // const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+  //   setEmail(e.target.value);
+  // };
 
   // chack image
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,6 +179,7 @@ const Hero = () => {
 
   const handleTranscription = (transcriptionText: string) => {
     setPrompt(transcriptionText);
+    setShoWAudio(transcriptionText);
   };
 
   const authorizeError = () => {
@@ -190,9 +195,7 @@ const Hero = () => {
       <Toaster />
 
       <Image src={Logo} width={150} height={150} alt="logo" />
-      <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
-        Tell us about your imagination
-      </p>
+
       {error && (
         <div>
           <div className="alert alert-danger">{error}</div>
@@ -225,15 +228,21 @@ const Hero = () => {
         {/* enter prompt */}
         {step === 1 && (
           <div className="flex fadeIn justify-center flex-col items-center w-full gap-4 p-3">
+            <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
+              Tell us about your imagination
+            </p>
             {isUsingSpeech ? (
-              <SpeechToText
-                onTranscription={handleTranscription}
-                isAuthorized={isAuthorized}
-              />
+              <>
+                <SpeechToText
+                  onTranscription={handleTranscription}
+                  isAuthorized={isAuthorized}
+                />
+                {showAudio && <p>{showAudio}</p>}
+              </>
             ) : (
               <input
                 type="text"
-                className="bg-gray-50 border fadeIn border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block xl:w-full lg:w-full md:w-full sm:full xs:w-[150%] p-2.5 outline-violet-700"
+                className="bg-gray-50 border fadeIn border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block xl:w-3/4 lg:w-full md:w-full sm:full xs:w-[150%] p-2.5 outline-violet-700"
                 value={prompt}
                 onChange={handlePromptChange}
                 placeholder="Enter prompt"
@@ -316,12 +325,17 @@ const Hero = () => {
         {/* user image preview */}
         {step === 3 &&
           (imageUrl ? (
-            <img
-              src={imageUrl}
-              alt="Preview"
-              style={{ maxWidth: "100%", maxHeight: "300px" }}
-              className="rounded-md border border-violet-700"
-            />
+            <>
+              <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
+                Your image
+              </p>
+              <img
+                src={imageUrl}
+                alt="Preview"
+                style={{ maxWidth: "100%", maxHeight: "300px" }}
+                className="rounded-md border border-violet-700"
+              />
+            </>
           ) : (
             <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
               <p className="font-light text-black">
@@ -330,7 +344,7 @@ const Hero = () => {
             </div>
           ))}
         {/* enter name & email */}
-        {step === 4 && (
+        {/* {step === 4 && (
           <div className="flex fadeIn xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
             <div className="flex flex-col w-full">
               <p className="text-lg p-2">Name</p>
@@ -353,15 +367,23 @@ const Hero = () => {
               />
             </div>
           </div>
-        )}
+        )} */}
 
         {resultImage && (
-          <img
-            className="rounded-lg border-3 border-violet-950"
-            width={750}
-            src={resultImage}
-            alt="Result"
-          />
+          <>
+            <img
+              className="rounded-lg border-3 border-violet-950"
+              width={750}
+              src={resultImage}
+              alt="Result"
+            />
+            <FacebookShareButton
+              url={resultImage}
+              quote={"Check out this awesome image!"}
+            >
+              <button className="share-button-class">Share on Facebook</button>
+            </FacebookShareButton>
+          </>
         )}
       </div>
       <div className="flex gap-5">
@@ -374,7 +396,7 @@ const Hero = () => {
             Back
           </button>
         )}
-        {step < 4 && (
+        {step < 3 && (
           <button
             className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
             onClick={handleNext}
@@ -382,7 +404,7 @@ const Hero = () => {
             Next
           </button>
         )}
-        {step === 4 && (
+        {step === 3 && (
           <button
             className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
               !isAuthorized ? "cursor-not-allowed	" : "cursor-pointer"
