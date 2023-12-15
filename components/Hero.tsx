@@ -264,7 +264,7 @@ const Hero = () => {
         {step === 2 && (
           <div className="flex flex-col gap-2 fadeIn items-center justify-center w-full">
             <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100">
-              {image && (
+              {/* {image && (
                 <div className="flex gap-3">
                   <svg
                     className="w-6 h-6 text-violet-800 dark:text-white"
@@ -281,9 +281,11 @@ const Hero = () => {
                       d="m6.072 10.072 2 2 6-4m3.586 4.314.9-.9a2 2 0 0 0 0-2.828l-.9-.9a2 2 0 0 1-.586-1.414V5.072a2 2 0 0 0-2-2H13.8a2 2 0 0 1-1.414-.586l-.9-.9a2 2 0 0 0-2.828 0l-.9.9a2 2 0 0 1-1.414.586H5.072a2 2 0 0 0-2 2v1.272a2 2 0 0 1-.586 1.414l-.9.9a2 2 0 0 0 0 2.828l.9.9a2 2 0 0 1 .586 1.414v1.272a2 2 0 0 0 2 2h1.272a2 2 0 0 1 1.414.586l.9.9a2 2 0 0 0 2.828 0l.9-.9a2 2 0 0 1 1.414-.586h1.272a2 2 0 0 0 2-2V13.8a2 2 0 0 1 .586-1.414Z"
                     />
                   </svg>
-                  <p className="text-violet-600 font-bold">Image Uploaded</p>
+                  <p className="text-violet-600 font-bold text-sm">
+                    Image Uploaded
+                  </p>
                 </div>
-              )}
+              )} */}
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg
                   className="w-8 h-8 mb-4 text-violet-600 dark:text-violet-900"
