@@ -102,7 +102,7 @@ const SpeechToText = ({
   };
 
   return (
-    <div>
+    <div className="fadeIn">
       <div className="flex justify-center items-center gap-2">
         <Toaster />
         <div className="flex gap-1 text-center items-center justify-center">
@@ -112,8 +112,8 @@ const SpeechToText = ({
                 <div className="bg-violet-500 cursor-pointer hover:bg-violet-700 p-2 rounded-lg">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="28"
-                    height="28"
+                    width="38"
+                    height="38"
                     fill="currentColor"
                     viewBox="0 0 16 16"
                   >
@@ -129,12 +129,11 @@ const SpeechToText = ({
                   </svg>
                 </div>
               </button>
-              <p>{isRecording ? "Stop Recording" : "Use Mic"}</p>
+              {/* <p>{isRecording ? "Stop Recording" : "Use Mic"}</p> */}
             </>
           ) : null}
         </div>
       </div>
-      {isRecording && <p>Recording...</p>}
     </div>
   );
 };

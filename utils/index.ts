@@ -7,7 +7,6 @@ interface User {
   id: string;
   name: string;
   email: string;
-  // ... add other fields as per your Firestore 'users' collection
 }
 
 export async function sendAudioToServer(

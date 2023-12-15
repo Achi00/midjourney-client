@@ -3,6 +3,8 @@ import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import SpeechToText from "./SpeechToText";
 import TermsModal from "./TermsModal";
+import Image from "next/image";
+import Logo from "../utils/Logo.png";
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -20,8 +22,15 @@ const Hero = () => {
   const [isAuthorized, setIsAuthorized] = useState(true);
   // steps for show previous or next jsx element
   const [step, setStep] = useState(1);
+  // input and microphone togle state
+  const [isUsingSpeech, setIsUsingSpeech] = useState(false);
 
   const passcodeInputRef = useRef<HTMLInputElement>(null);
+
+  // toggle between input and microphone
+  const handleToggle = () => {
+    setIsUsingSpeech(!isUsingSpeech); // Toggle between input and speech-to-text
+  };
 
   const verifyPasscode = async () => {
     try {
@@ -179,38 +188,11 @@ const Hero = () => {
   return (
     <div className="w-full flex justify-center items-center flex-col gap-[3vmin]">
       <Toaster />
-      <h1 className="xl:text-3xl lg:text-3xl md:text-2xl sm:text-xl xs:text-lg font-bold text-violet-800">
-        Face Swap App
-      </h1>
-      <h1 className="xl:text-md lg:text-md md:text-md sm:text-sm xs:text-sm font-slim text-violet-800">
-        Generate image in 60 seconds
-      </h1>
-      <div className="xl:w-1/4 lg:w-1/4 md:w-1/2 sm:w-1/2 xs:w-3/4 flex items-center justify-center">
-        <div
-          role="alert"
-          className="relative flex items-center justify-center w-full px-1 py-4 text-base text-violet-800 rounded-lg border-2 border-violet-800 font-regular"
-        >
-          <div className="shrink-0">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-              ></path>
-            </svg>
-          </div>
-          <div className="ml-3 mr-12 xl:text-md lg:text-md md:lg:text-sm sm:lg:text-xs xs:text-xs">
-            Make sure nothing is covering your face
-          </div>
-        </div>
-      </div>
+
+      <Image src={Logo} width={150} height={150} alt="logo" />
+      <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
+        Tell us about your imagination
+      </p>
       {error && (
         <div>
           <div className="alert alert-danger">{error}</div>
@@ -235,26 +217,35 @@ const Hero = () => {
           </button>
         </div>
       </div> */}
-      <div className="flex text-center">
+      {/* <div className="flex text-center">
         <TermsModal />
-      </div>
+      </div> */}
       {/* upload field */}
       <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
         {/* enter prompt */}
         {step === 1 && (
-          <div className="flex fadeIn justify-center xl:flex-row lg:flex-row md:flex-row sm:flex-row xs:flex-col items-center w-full gap-4 p-3">
-            <input
-              type="text"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-              value={prompt}
-              onChange={handlePromptChange}
-              placeholder="Enter prompt"
-            />
-            {/* microphone */}
-            <SpeechToText
-              onTranscription={handleTranscription}
-              isAuthorized={isAuthorized}
-            />
+          <div className="flex fadeIn justify-center flex-col items-center w-full gap-4 p-3">
+            {isUsingSpeech ? (
+              <SpeechToText
+                onTranscription={handleTranscription}
+                isAuthorized={isAuthorized}
+              />
+            ) : (
+              <input
+                type="text"
+                className="bg-gray-50 border fadeIn border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block xl:w-full lg:w-full md:w-full sm:full xs:w-[150%] p-2.5 outline-violet-700"
+                value={prompt}
+                onChange={handlePromptChange}
+                placeholder="Enter prompt"
+              />
+            )}
+
+            <button
+              onClick={handleToggle}
+              className=" border border-violet-900 p-2 rounded-md text-black"
+            >
+              {isUsingSpeech ? "or write your imagination" : "Try Microphone"}
+            </button>
           </div>
         )}
         {/* upload image */}
@@ -332,7 +323,7 @@ const Hero = () => {
               className="rounded-md border border-violet-700"
             />
           ) : (
-            <div className="flex justify-center items-center bg-white rounded-md w-1/4 h-[150px] border border-violet-700 border-dashed">
+            <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
               <p className="font-light text-black">
                 Your image preview here...
               </p>
