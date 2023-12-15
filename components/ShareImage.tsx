@@ -21,7 +21,14 @@ const ShareImage = ({ imageUrl }: ShareButtonProps) => {
     }
   };
 
-  return <button onClick={handleShare}>Share Image</button>;
+  return (
+    <button
+      className="bg-violet-700 rounded-md p-1 text-xl"
+      onClick={handleShare}
+    >
+      Share Image
+    </button>
+  );
 };
 
 export default ShareImage;

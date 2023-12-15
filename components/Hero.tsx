@@ -28,7 +28,8 @@ const Hero = () => {
   const [isUsingSpeech, setIsUsingSpeech] = useState(false);
   // show audio text
   const [showAudio, setShoWAudio] = useState("");
-
+  // loading
+  const [loading, setLoading] = useState(false);
   const passcodeInputRef = useRef<HTMLInputElement>(null);
 
   // toggle between input and microphone
@@ -67,7 +68,7 @@ const Hero = () => {
 
   // Handlers for step transitions
   const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+    if (step < 3) setStep(step + 1);
   };
 
   const handleBack = () => {
@@ -160,8 +161,8 @@ const Hero = () => {
     formData.append("prompt", prompt);
     formData.append("name", name);
     formData.append("email", email);
-
     try {
+      setLoading(true);
       const response = await fetch(
         "https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
         {
@@ -171,7 +172,9 @@ const Hero = () => {
       );
 
       await handleResponse(response);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.error("Request failed:", error);
       toast.error("An error occurred while processing your request.");
     }
@@ -195,7 +198,7 @@ const Hero = () => {
       <Toaster />
 
       <Image src={Logo} width={150} height={150} alt="logo" />
-
+      {loading && <h1>Please Wait</h1>}
       {error && (
         <div>
           <div className="alert alert-danger">{error}</div>
@@ -259,7 +262,7 @@ const Hero = () => {
         )}
         {/* upload image */}
         {step === 2 && (
-          <div className="flex fadeIn items-center justify-center w-full">
+          <div className="flex flex-col gap-2 fadeIn items-center justify-center w-full">
             <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100">
               {image && (
                 <div className="flex gap-3">
@@ -319,30 +322,43 @@ const Hero = () => {
                 className="hidden"
               />
             </label>
+            {imageUrl ? (
+              <>
+                <img
+                  src={imageUrl}
+                  alt="Preview"
+                  style={{ maxWidth: "100%", maxHeight: "250px" }}
+                  className="rounded-md border border-violet-700"
+                />
+              </>
+            ) : null}
           </div>
         )}
 
         {/* user image preview */}
-        {step === 3 &&
-          (imageUrl ? (
-            <>
-              <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
-                Your image
-              </p>
-              <img
-                src={imageUrl}
-                alt="Preview"
-                style={{ maxWidth: "100%", maxHeight: "300px" }}
-                className="rounded-md border border-violet-700"
-              />
-            </>
-          ) : (
-            <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
-              <p className="font-light text-black">
-                Your image preview here...
-              </p>
-            </div>
-          ))}
+        {
+          step === 3 && null
+          // (imageUrl ? (
+          //   <>
+          //     <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
+          //       Your image
+          //     </p>
+          //     <img
+          //       src={imageUrl}
+          //       alt="Preview"
+          //       style={{ maxWidth: "100%", maxHeight: "300px" }}
+          //       className="rounded-md border border-violet-700"
+          //     />
+          //   </>
+          // ) : (
+          //   <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
+          //     <p className="font-light text-black">
+          //       Your image preview here...
+          //     </p>
+          //   </div>
+          // )
+          // )
+        }
         {/* enter name & email */}
         {/* {step === 4 && (
           <div className="flex fadeIn xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
@@ -381,7 +397,9 @@ const Hero = () => {
               url={resultImage}
               quote={"Check out this awesome image!"}
             >
-              <button className="share-button-class">Share on Facebook</button>
+              <button className="bg-violet-700 p-2 rounded-md text-white text-xl">
+                Share on Facebook
+              </button>
             </FacebookShareButton>
           </>
         )}
@@ -396,7 +414,7 @@ const Hero = () => {
             Back
           </button>
         )}
-        {step < 3 && (
+        {step < 2 && (
           <button
             className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
             onClick={handleNext}
@@ -404,13 +422,15 @@ const Hero = () => {
             Next
           </button>
         )}
-        {step === 3 && (
+        {step === 2 && (
           <button
             className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
-              !isAuthorized ? "cursor-not-allowed	" : "cursor-pointer"
+              !isAuthorized || loading
+                ? "cursor-not-allowed bg-violet-400"
+                : "cursor-pointer"
             }`}
             onClick={isAuthorized ? handleSubmit : authorizeError}
-            // disabled={!isAuthorized}
+            disabled={!isAuthorized || loading}
           >
             {isAuthorized ? "Submit" : "Authorize First"}
           </button>
