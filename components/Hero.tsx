@@ -324,7 +324,7 @@ const Hero = () => {
                 className="hidden"
               />
             </label>
-            {imageUrl ? (
+            {imageUrl && !resultImage ? (
               <>
                 <img
                   src={imageUrl}
