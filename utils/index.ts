@@ -39,7 +39,7 @@ export async function sendAudioToServer(
   }
 }
 
-export async function getchDataFromFirestore() {
+export async function fetchDataFromFirestore() {
   const querySnapshot = await getDocs(collection(db, "users"));
 
   const data: User[] = [];
@@ -50,5 +50,13 @@ export async function getchDataFromFirestore() {
     data.push({ id: doc.id, ...otherData });
   });
 
+  return data;
+}
+
+export async function fetchPaginatedImages(page: any, limit = 10) {
+  const response = await fetch(
+    `https://abovedigital-1696444393502.ew.r.appspot.com/paginated-images?page=${page}&limit=${limit}`
+  );
+  const data = await response.json();
   return data;
 }

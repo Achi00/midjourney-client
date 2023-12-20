@@ -20,32 +20,6 @@ const SpeechToText = ({
   const startRecording = async () => {
     try {
       setIsRecording(true);
-      toast.success("Recording started");
-      toast.custom(
-        (t) => (
-          <div
-            className={`toast flex justify-center items-center ${
-              t.visible ? "animate-enter" : "animate-leave"
-            }`}
-          >
-            <div className="blinking-red-dot"></div>
-            <div className="visualizer-container">
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              <div className="visualizer-bar"></div>
-              {/* Add more bars if needed */}
-            </div>
-          </div>
-        ),
-        {
-          duration: Infinity, // Keep the toast visible while recording
-        }
-      );
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const newMediaRecorder = new MediaRecorder(stream);
       newMediaRecorder.ondataavailable = (event) => {
@@ -105,7 +79,28 @@ const SpeechToText = ({
     <div className="fadeIn">
       <div className="flex justify-center items-center gap-2">
         <Toaster />
-        <div className="flex gap-1 text-center items-center justify-center">
+        <div className="flex flex-col gap-3 text-center items-center justify-center">
+          <div>
+            {isRecording ? (
+              <div className={`toast flex justify-center items-center fadeIn`}>
+                <div className="blinking-red-dot"></div>
+                <div className="visualizer-container">
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                  <div className="visualizer-bar"></div>
+                </div>
+              </div>
+            ) : (
+              <div
+                className={`non-visible-toast flex h-12 justify-center items-center fadeIn`}
+              ></div>
+            )}
+          </div>
           {isAuthorized ? (
             <div className="flex flex-col">
               <button onClick={toggleRecording}>
@@ -129,6 +124,7 @@ const SpeechToText = ({
                   </svg>
                 </div>
               </button>
+
               <p className="font-bold">{isRecording ? "Stop" : "Start"}</p>
             </div>
           ) : null}
