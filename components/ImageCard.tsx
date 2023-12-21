@@ -44,10 +44,10 @@ const ImageCard = ({ data }: ImageCardProps) => {
           <div className="absolute bottom-0 border-t border-violet-800 left-0 right-0 h-[100px] bg-gradient-to-t from-black/40 via-black/20 to-black/0 backdrop-blur-sm" />
           {/* Content */}
           <div className="absolute bottom-0 left-0 right-0 flex flex-col gap-2 p-4">
-            <h3 className="text-white text-lg flex items-center gap-2 font-bold">
+            {/* <h3 className="text-white text-lg flex items-center gap-2 font-bold">
               <FaRegUserCircle />
               {data.name}
-            </h3>
+            </h3> */}
             {/* <p className="text-white text-sm">Email: {data.email}</p> */}
             <div className="flex w-full bg-violet-700 p-1 rounded-lg">
               {data.prompt && (

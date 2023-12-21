@@ -2,7 +2,6 @@
 import React, { useEffect, useState, useRef, ChangeEvent } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import SpeechToText from "./SpeechToText";
-import TermsModal from "./TermsModal";
 import Image from "next/image";
 import Logo from "../utils/Logo.png";
 import camera from "../utils/camera.png";
@@ -32,6 +31,8 @@ const Hero = () => {
   // loading
   const [loading, setLoading] = useState(false);
   const passcodeInputRef = useRef<HTMLInputElement>(null);
+  // terms and conditions checking
+  const [isChecked, setIsChecked] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -119,7 +120,7 @@ const Hero = () => {
           toast.error("Error: No face detected in the uploaded image.");
           break;
         case "Inappropriate content detected in the prompt.":
-          toast.error("Error: Inappropriate content detected in the prompt.");
+          // toast.error("Error: Inappropriate content detected in the prompt.");
           setPromptInputClass("border-2 border-red-700");
           setStep(2);
           break;
@@ -214,12 +215,25 @@ const Hero = () => {
     }
   };
 
+  const startOver = () => {
+    setStep(2); // Navigate to the prompt input step
+    setResultImage(null);
+    setPrompt("");
+    setImageUrl(undefined);
+  };
+
   return (
     <>
       <div className="w-full flex justify-center items-center flex-col gap-[7vmin]">
         <Toaster />
 
-        <Image src={Logo} width={150} height={150} alt="logo" />
+        <Image
+          className="ml-5 pt-7"
+          src={Logo}
+          width={150}
+          height={150}
+          alt="logo"
+        />
 
         {errorMessage && (
           <div
@@ -242,15 +256,15 @@ const Hero = () => {
           </div>
         )}
         {loading && (
-          <>
-            <h2 className="text-semibold w-1/4">
+          <div className="fadeIn flex w-full justify-center items-center flex-col gap-5">
+            <h2 className="font-bold text-center xl:w-1/4 lg:w-1/4 md:w-1/2 sm:w-1/2 xs:3/4">
               Our Artificial Intelligence System is Creating image by your
               imagination, Please be patient, it takes about 60 seconds
             </h2>
             <button
               disabled
               type="button"
-              className="py-4 px-8 me-2 text-lg font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center"
+              className="py-4 px-8 me-2 text-lg font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 inline-flex items-center"
             >
               <svg
                 aria-hidden="true"
@@ -269,9 +283,9 @@ const Hero = () => {
                   fill="#1C64F2"
                 />
               </svg>
-              Loading...
+              Generating image
             </button>
-          </>
+          </div>
         )}
         {error && (
           <div>
@@ -299,9 +313,7 @@ const Hero = () => {
             </div>
           </div>
         )}
-        {/* <div className="flex text-center">
-        <TermsModal />
-      </div> */}
+
         {/* upload field */}
         <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
           {/* enter prompt */}
@@ -312,12 +324,16 @@ const Hero = () => {
               </p>
               {isUsingSpeech ? (
                 <>
+                  {showAudio && (
+                    <p className="font-bold text-lg text-green-700">
+                      {showAudio}
+                    </p>
+                  )}
                   <SpeechToText
                     onTranscription={handleTranscription}
                     onOriginalTranscription={handleOriginalTranscription} // Provide this function
                     isAuthorized={isAuthorized}
                   />
-                  {showAudio && <p>{showAudio}</p>}
                 </>
               ) : (
                 <input
@@ -325,7 +341,7 @@ const Hero = () => {
                   className={`bg-gray-50 border fadeIn border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block xl:w-3/4 lg:w-full md:w-full sm:full xs:w-[150%] p-2.5 outline-violet-700 ${promptInputClass}`}
                   value={prompt}
                   onChange={handlePromptChange}
-                  placeholder="Enter prompt"
+                  placeholder="Write your imagination"
                 />
               )}
 
@@ -339,44 +355,37 @@ const Hero = () => {
           )}
           {/* upload image */}
           {step === 3 &&
-            (resultImage ? (
-              // Render a small button when resultImage is available
-              <div className="flex justify-center items-center">
-                <label className="flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center bg-violet-500  hover:bg-violet-400 gap-2 px-2">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Image src={camera} alt="camera" width={30} height={30} />
-                  </div>
-                  <h1 className="font-bold text-white">Upload Again</h1>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                </label>
-              </div>
-            ) : imageUrl ? (
+            (resultImage ? //       onChange={handleImageChange} //       disabled={!isChecked} //       accept="image/*" //       type="file" //     <input //     <h1 className="font-bold text-white">Upload Again</h1> //     </div> //       <Image src={camera} alt="camera" width={70} height={30} /> //     <div className="flex flex-col items-center justify-center pt-5 pb-6"> //   > //     } gap-2 px-2`} //         : "bg-violet-300" //         ? "bg-violet-500  hover:bg-violet-400" //       isChecked //     className={`flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center ${ //   <label // <div className="flex justify-center items-center"> // Render a small button when resultImage is available
+            //       className="hidden"
+            //     />
+            //   </label>
+            // </div>
+            null : imageUrl ? (
               // Render the small "Upload again" button and image preview when imageUrl is available
               <div className="flex flex-col gap-10 justify-center items-center">
-                <label className="flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center bg-violet-500  hover:bg-violet-400 gap-2 px-2">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Image src={camera} alt="camera" width={30} height={30} />
-                  </div>
-                  {loading ? (
-                    <h1 className="font-bold text-white">Please Wait...</h1>
-                  ) : (
-                    <>
-                      <h1 className="font-bold text-white">Upload Again</h1>
+                {!loading && (
+                  <label
+                    className={`flex w-full items-center justify-center border-2 rounded-lg text-center ${
+                      loading
+                        ? "bg-violet-300 cursor-not-allowed"
+                        : " bg-violet-700 cursor-pointer hover:bg-violet-500 transition-all"
+                    } gap-2 px-2`}
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Image src={camera} alt="camera" width={30} height={30} />
+                    </div>
 
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="hidden"
-                      />
-                    </>
-                  )}
-                </label>
+                    <h1 className="font-bold text-white">Upload Again</h1>
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      disabled={loading}
+                    />
+                  </label>
+                )}
                 <img
                   src={imageUrl}
                   alt="Preview"
@@ -386,18 +395,44 @@ const Hero = () => {
               </div>
             ) : (
               // Render the image upload section when neither imageUrl nor resultImage is set
-              <div className="flex flex-col xl:gap-[10vmin] lg:gap-[10vmin] md:gap-[10vmin] sm:gap-[10vmin] xs:gap-[10vmin] py-[5vmin] fadeIn items-center justify-center w-full">
-                <h1 className="font-bold text-lg">
-                  Upload Image Or Take Selfie
+              <div className="flex flex-col xl:gap-[10vmin] lg:gap-[10vmin] md:gap-[10vmin] sm:gap-[10vmin] xs:gap-[10vmin] py-[5vmin] fadeIn items-center justify-center w-[250px]">
+                <div className="flex text-center">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={(e) => setIsChecked(e.target.checked)}
+                    className="mr-2"
+                  />
+                  <p className="text-sm">
+                    I Agree{" "}
+                    <a
+                      href="https://abovedigital.io/privacy-policy/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <span className="text-violet-700 hover:underline decoration-1 cursor-pointer">
+                        Terms and Conditions
+                      </span>
+                    </a>
+                  </p>
+                </div>
+                <h1 className="font-bold text-center text-lg">
+                  Take Selfie Or Upload Image
                 </h1>
-                <label className="flex w-full flex-col items-center justify-center h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer text-center bg-gray-50  hover:bg-gray-100">
+                <label
+                  className={`flex w-[30vmin] flex-col items-center justify-center  rounded-lg text-center ${
+                    isChecked
+                      ? "bg-violet-600 cursor-pointer "
+                      : "bg-violet-300 cursor-not-allowed"
+                  } `}
+                >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Image src={camera} alt="camera" width={90} height={90} />
+                    <Image src={camera} alt="camera" width={40} height={40} />
                   </div>
-                  <h1 className="text-semibold">Click Here To Upload</h1>
                   <input
                     type="file"
                     accept="image/*"
+                    disabled={!isChecked}
                     onChange={handleImageChange}
                     className="hidden"
                   />
@@ -405,55 +440,16 @@ const Hero = () => {
               </div>
             ))}
 
+          {step === 3 && resultImage && (
+            <button
+              className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
+              onClick={startOver}
+            >
+              Start Over
+            </button>
+          )}
+
           {/* user image preview */}
-          {
-            step === 4 && null
-            // (imageUrl ? (
-            //   <>
-            //     <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
-            //       Your image
-            //     </p>
-            //     <img
-            //       src={imageUrl}
-            //       alt="Preview"
-            //       style={{ maxWidth: "100%", maxHeight: "300px" }}
-            //       className="rounded-md border border-violet-700"
-            //     />
-            //   </>
-            // ) : (
-            //   <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
-            //     <p className="font-light text-black">
-            //       Your image preview here...
-            //     </p>
-            //   </div>
-            // )
-            // )
-          }
-          {/* enter name & email */}
-          {/* {step === 4 && (
-          <div className="flex fadeIn xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
-            <div className="flex flex-col w-full">
-              <p className="text-lg p-2">Name</p>
-              <input
-                type="text"
-                placeholder="Enter your Name..."
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-                value={name}
-                onChange={handleNameChange}
-              />
-            </div>
-            <div className="flex flex-col w-full">
-              <p className="text-lg p-2">Email</p>
-              <input
-                type="text"
-                placeholder="Enter your Email Address..."
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-                value={email}
-                onChange={handleEmailChange}
-              />
-            </div>
-          </div>
-        )} */}
 
           {resultImage && (
             <>
@@ -470,7 +466,7 @@ const Hero = () => {
       </div>
       <div className="flex gap-5 pb-5 pt-2">
         {/* Navigation Buttons */}
-        {step > 1 && (step !== 2 || !isAuthorized) && (
+        {step > 1 && (step !== 2 || !isAuthorized) && !resultImage && (
           <button
             className={`${
               loading
@@ -483,7 +479,7 @@ const Hero = () => {
             Back
           </button>
         )}
-        {step < 3 && (
+        {step < 3 && !resultImage && (
           <button
             className={`py-2 px-4 border border-violet-900 rounded-lg w-[90px] font-bold ${
               (step === 1 && !isAuthorized) ||
@@ -502,7 +498,7 @@ const Hero = () => {
             Next
           </button>
         )}
-        {step === 3 && (
+        {step === 3 && !resultImage && (
           <button
             className={`  text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
               loading
