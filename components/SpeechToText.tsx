@@ -6,9 +6,14 @@ import { sendAudioToServer } from "@/utils";
 
 const SpeechToText = ({
   onTranscription,
+  onOriginalTranscription,
   isAuthorized,
 }: {
-  onTranscription: (transcription: string) => void;
+  onTranscription: (
+    englishTranslation: string,
+    greekTranscription: string
+  ) => void;
+  onOriginalTranscription: (transcription: string) => void;
   isAuthorized: boolean;
 }) => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
@@ -48,9 +53,17 @@ const SpeechToText = ({
               type: "audio/webm;codecs=opus",
             });
             if (audioBlob.size > 0) {
-              sendAudioToServer(audioBlob, onTranscription).catch(
-                console.error
-              );
+              // Inside SpeechToText.tsx
+              sendAudioToServer(
+                audioBlob,
+                (englishTranslation, greekTranscription) => {
+                  onTranscription(englishTranslation, greekTranscription);
+                  if (onOriginalTranscription) {
+                    onOriginalTranscription(greekTranscription);
+                  }
+                }
+              ).catch(console.error);
+
               setIsRecording(false);
             } else {
               console.error("No audio recorded");
@@ -97,7 +110,7 @@ const SpeechToText = ({
               </div>
             ) : (
               <div
-                className={`non-visible-toast flex h-12 justify-center items-center fadeIn`}
+                className={`non-visible-toast flex justify-center items-center fadeIn`}
               ></div>
             )}
           </div>

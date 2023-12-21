@@ -5,8 +5,9 @@ import SpeechToText from "./SpeechToText";
 import TermsModal from "./TermsModal";
 import Image from "next/image";
 import Logo from "../utils/Logo.png";
-import ShareImage from "./ShareImage";
+import camera from "../utils/camera.png";
 import { FacebookShareButton } from "next-share";
+import DownloadButton from "./Download";
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -21,7 +22,7 @@ const Hero = () => {
   const [error, setError] = useState("");
   // easy authentication
   const [passcode, setPasscode] = useState("");
-  const [isAuthorized, setIsAuthorized] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
   // steps for show previous or next jsx element
   const [step, setStep] = useState(1);
   // input and microphone togle state
@@ -43,7 +44,7 @@ const Hero = () => {
         toast.error("Please enter password");
       } else {
         const response = await fetch(
-          "https://abovedigital-1696444393502.ew.r.appspot.com/verify-passcode",
+          "https://https://abovedigital-1696444393502.ew.r.appspot.com/verify-passcode",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -79,13 +80,14 @@ const Hero = () => {
   const handleResponse = async (response: any) => {
     if (response.ok) {
       const data = await response.json();
+      console.log("Response data:", data);
       if (data.imageUrl) {
         setResultImage(data.imageUrl);
         toast.dismiss(); // Dismiss the loading toast
         toast.success("Image generation completed!");
       } else {
         console.error("URL not found in response");
-        toast.error("An error occurred while processing the image.");
+        toast.error("URL not found in response");
       }
     } else {
       toast.dismiss(); // Dismiss the loading toast before displaying the error message
@@ -163,7 +165,7 @@ const Hero = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
+        "https://https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
         {
           method: "POST",
           body: formData,
@@ -179,9 +181,17 @@ const Hero = () => {
     }
   };
 
-  const handleTranscription = (transcriptionText: string) => {
-    setPrompt(transcriptionText);
-    setShoWAudio(transcriptionText);
+  const handleTranscription = (
+    englishTranslation: string,
+    greekTranscription: string
+  ) => {
+    setPrompt(englishTranslation);
+    setShoWAudio(englishTranslation);
+  };
+
+  const handleOriginalTranscription = (greekTranscription: string) => {
+    // Handle the Greek transcription here
+    console.log("Greek Transcription:", greekTranscription);
   };
 
   const authorizeError = () => {
@@ -193,200 +203,179 @@ const Hero = () => {
   };
 
   return (
-    <div className="w-full flex justify-center items-center flex-col gap-[3vmin]">
-      <Toaster />
+    <>
+      <div className="w-full flex justify-center items-center flex-col gap-[7vmin]">
+        <Toaster />
 
-      <Image src={Logo} width={150} height={150} alt="logo" />
-      {loading && (
-        <button
-          disabled
-          type="button"
-          className="py-4 px-8 me-2 text-lg font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center"
-        >
-          <svg
-            aria-hidden="true"
-            role="status"
-            className="inline w-8 h-8 me-3 text-gray-200 animate-spin dark:text-gray-600"
-            viewBox="0 0 100 101"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
-              fill="currentColor"
-            />
-            <path
-              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
-              fill="#1C64F2"
-            />
-          </svg>
-          Loading...
-        </button>
-      )}
-      {error && (
-        <div>
-          <div className="alert alert-danger">{error}</div>
-        </div>
-      )}
-      {/* password */}
-      {/* <div className="flex flex-col items-center justify-center gap-3">
-        <h1>Please verify password</h1>
-        <div className="flex gap-6 h-15">
-          <input
-            type="password"
-            ref={passcodeInputRef}
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-            value={passcode}
-            onChange={(e) => setPasscode(e.target.value)}
-          />
+        <Image src={Logo} width={150} height={150} alt="logo" />
+        {loading && (
           <button
-            className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg text-sm"
-            onClick={verifyPasscode}
+            disabled
+            type="button"
+            className="py-4 px-8 me-2 text-lg font-medium text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 inline-flex items-center"
           >
-            Verify Password
-          </button>
-        </div>
-      </div> */}
-      {/* <div className="flex text-center">
-        <TermsModal />
-      </div> */}
-      {/* upload field */}
-      <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
-        {/* enter prompt */}
-        {step === 1 && (
-          <div className="flex fadeIn justify-center flex-col items-center w-full gap-4 p-3">
-            <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
-              Tell us about your imagination
-            </p>
-            {isUsingSpeech ? (
-              <>
-                <SpeechToText
-                  onTranscription={handleTranscription}
-                  isAuthorized={isAuthorized}
-                />
-                {showAudio && <p>{showAudio}</p>}
-              </>
-            ) : (
-              <input
-                type="text"
-                className="bg-gray-50 border fadeIn border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block xl:w-3/4 lg:w-full md:w-full sm:full xs:w-[150%] p-2.5 outline-violet-700"
-                value={prompt}
-                onChange={handlePromptChange}
-                placeholder="Enter prompt"
-              />
-            )}
-
-            <button
-              onClick={handleToggle}
-              className=" border border-violet-900 p-2 rounded-md text-black"
+            <svg
+              aria-hidden="true"
+              role="status"
+              className="inline w-8 h-8 me-3 text-gray-200 animate-spin dark:text-gray-600"
+              viewBox="0 0 100 101"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
             >
-              {isUsingSpeech ? "or write your imagination" : "Try Microphone"}
-            </button>
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="currentColor"
+              />
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="#1C64F2"
+              />
+            </svg>
+            Loading...
+          </button>
+        )}
+        {error && (
+          <div>
+            <div className="alert alert-danger">{error}</div>
           </div>
         )}
-        {/* upload image */}
-        {step === 2 && (
-          <div className="flex flex-col gap-2 fadeIn items-center justify-center w-full">
-            <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer bg-gray-50  hover:bg-gray-100">
-              {/* {image && (
-                <div className="flex gap-3">
-                  <svg
-                    className="w-6 h-6 text-violet-800 dark:text-white"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 21 21"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="m6.072 10.072 2 2 6-4m3.586 4.314.9-.9a2 2 0 0 0 0-2.828l-.9-.9a2 2 0 0 1-.586-1.414V5.072a2 2 0 0 0-2-2H13.8a2 2 0 0 1-1.414-.586l-.9-.9a2 2 0 0 0-2.828 0l-.9.9a2 2 0 0 1-1.414.586H5.072a2 2 0 0 0-2 2v1.272a2 2 0 0 1-.586 1.414l-.9.9a2 2 0 0 0 0 2.828l.9.9a2 2 0 0 1 .586 1.414v1.272a2 2 0 0 0 2 2h1.272a2 2 0 0 1 1.414.586l.9.9a2 2 0 0 0 2.828 0l.9-.9a2 2 0 0 1 1.414-.586h1.272a2 2 0 0 0 2-2V13.8a2 2 0 0 1 .586-1.414Z"
-                    />
-                  </svg>
-                  <p className="text-violet-600 font-bold text-sm">
-                    Image Uploaded
-                  </p>
-                </div>
-              )} */}
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                  className="w-8 h-8 mb-4 text-violet-600 dark:text-violet-900"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 20 16"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                  />
-                </svg>
-                {image ? (
-                  <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="font-semibold">Click Again</span> to upload
-                    or drag and drop
-                  </p>
-                ) : (
-                  <p className="mb-2 p-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="font-semibold">Click to upload</span> or
-                    drag and drop
-                  </p>
-                )}
-                <p className="text-xs p-2 text-gray-500 dark:text-gray-400">
-                  SVG, PNG or JPG (Image should have good quality)
-                </p>
-              </div>
+        {/* password */}
+        {step === 1 && (
+          <div className="flex flex-col items-center justify-center gap-3">
+            <h1>Please verify password</h1>
+            <div className="flex xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col gap-6 h-15">
               <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
+                type="password"
+                ref={passcodeInputRef}
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
               />
-            </label>
-            {imageUrl && !resultImage ? (
-              <>
+              <button
+                className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg text-sm"
+                onClick={verifyPasscode}
+              >
+                Verify Password
+              </button>
+            </div>
+          </div>
+        )}
+        {/* <div className="flex text-center">
+        <TermsModal />
+      </div> */}
+        {/* upload field */}
+        <div className="flex flex-col gap-5 items-center justify-center w-[50%]">
+          {/* enter prompt */}
+          {step === 2 && (
+            <div className="flex fadeIn justify-center flex-col items-center w-full gap-4 p-3">
+              <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
+                Tell us about your imagination
+              </p>
+              {isUsingSpeech ? (
+                <>
+                  <SpeechToText
+                    onTranscription={handleTranscription}
+                    onOriginalTranscription={handleOriginalTranscription} // Provide this function
+                    isAuthorized={isAuthorized}
+                  />
+                  {showAudio && <p>{showAudio}</p>}
+                </>
+              ) : (
+                <input
+                  type="text"
+                  className="bg-gray-50 border fadeIn border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block xl:w-3/4 lg:w-full md:w-full sm:full xs:w-[150%] p-2.5 outline-violet-700"
+                  value={prompt}
+                  onChange={handlePromptChange}
+                  placeholder="Enter prompt"
+                />
+              )}
+
+              <button
+                onClick={handleToggle}
+                className=" border border-violet-900 p-2 rounded-md text-black"
+              >
+                {isUsingSpeech ? "or write your imagination" : "Try Microphone"}
+              </button>
+            </div>
+          )}
+          {/* upload image */}
+          {step === 3 &&
+            (resultImage ? (
+              // Render a small button when resultImage is available
+              <div className="flex justify-center items-center">
+                <button
+                  className="bg-violet-500 flex items-center gap-2 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg xl:text-lg lg:text-lg md:text-md sm:text-sm xs:text-sm"
+                  // Add your onClick or other event handlers here for resultImage
+                >
+                  <Image src={camera} alt="camera" width={40} height={40} />
+                  {/* Label for your button related to resultImage */}
+                  Upload Again
+                </button>
+              </div>
+            ) : imageUrl ? (
+              // Render the small "Upload again" button and image preview when imageUrl is available
+              <div className="flex flex-col gap-10 justify-center items-center">
+                <button
+                  className="bg-violet-500 flex items-center gap-2 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
+                  // Add your onClick or other event handlers here for imageUrl
+                >
+                  <Image src={camera} alt="camera" width={40} height={40} />
+                  Upload again
+                </button>
                 <img
                   src={imageUrl}
                   alt="Preview"
                   style={{ maxWidth: "100%", maxHeight: "250px" }}
                   className="rounded-md border border-violet-700"
                 />
-              </>
-            ) : null}
-          </div>
-        )}
+              </div>
+            ) : (
+              // Render the image upload section when neither imageUrl nor resultImage is set
+              <div className="flex flex-col xl:gap-[10vmin] lg:gap-[10vmin] md:gap-[10vmin] sm:gap-[10vmin] xs:gap-[10vmin] py-[5vmin] fadeIn items-center justify-center w-full">
+                <h1 className="font-bold text-lg">
+                  Upload Image Or Take Selfie
+                </h1>
+                <label className="flex w-full flex-col items-center justify-center h-64 border-2 border-gray-300 focus:border-green-600 border-dashed rounded-lg cursor-pointer text-center bg-gray-50  hover:bg-gray-100">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Image src={camera} alt="camera" width={90} height={90} />
+                  </div>
+                  <h1 className="text-semibold">Click Here To Upload</h1>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            ))}
 
-        {/* user image preview */}
-        {
-          step === 3 && null
-          // (imageUrl ? (
-          //   <>
-          //     <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
-          //       Your image
-          //     </p>
-          //     <img
-          //       src={imageUrl}
-          //       alt="Preview"
-          //       style={{ maxWidth: "100%", maxHeight: "300px" }}
-          //       className="rounded-md border border-violet-700"
-          //     />
-          //   </>
-          // ) : (
-          //   <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
-          //     <p className="font-light text-black">
-          //       Your image preview here...
-          //     </p>
-          //   </div>
-          // )
-          // )
-        }
-        {/* enter name & email */}
-        {/* {step === 4 && (
+          {/* user image preview */}
+          {
+            step === 4 && null
+            // (imageUrl ? (
+            //   <>
+            //     <p className="text-center font-semibold xl:text-xl lg:text-xl md:text-lg sm:text-md xs:text-xs">
+            //       Your image
+            //     </p>
+            //     <img
+            //       src={imageUrl}
+            //       alt="Preview"
+            //       style={{ maxWidth: "100%", maxHeight: "300px" }}
+            //       className="rounded-md border border-violet-700"
+            //     />
+            //   </>
+            // ) : (
+            //   <div className="flex text-center justify-center items-center bg-white rounded-md xl:w-1/2 lg:w-1/4 md:w-1/2 h-[150px] border border-violet-700 border-dashed">
+            //     <p className="font-light text-black">
+            //       Your image preview here...
+            //     </p>
+            //   </div>
+            // )
+            // )
+          }
+          {/* enter name & email */}
+          {/* {step === 4 && (
           <div className="flex fadeIn xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col justify-center items-center w-full gap-4 p-3">
             <div className="flex flex-col w-full">
               <p className="text-lg p-2">Name</p>
@@ -411,26 +400,20 @@ const Hero = () => {
           </div>
         )} */}
 
-        {resultImage && (
-          <>
-            <img
-              className="rounded-lg border-3 border-violet-950"
-              width={750}
-              src={resultImage}
-              alt="Result"
-            />
-            <FacebookShareButton
-              url={resultImage}
-              quote={"Check out this awesome image!"}
-            >
-              <button className="bg-violet-700 p-2 rounded-md text-white text-xl">
-                Share on Facebook
-              </button>
-            </FacebookShareButton>
-          </>
-        )}
+          {resultImage && (
+            <>
+              <img
+                className="rounded-lg border-3 border-violet-950"
+                width={750}
+                src={resultImage}
+                alt="Result"
+              />
+              <DownloadButton imageUrl={resultImage} />
+            </>
+          )}
+        </div>
       </div>
-      <div className="flex gap-5">
+      <div className="flex gap-5 pb-5 pt-2">
         {/* Navigation Buttons */}
         {step > 1 && (
           <button
@@ -440,15 +423,26 @@ const Hero = () => {
             Back
           </button>
         )}
-        {step < 2 && (
+        {step < 3 && (
           <button
-            className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
+            className={`py-2 px-4 border border-violet-900 rounded-lg w-[90px] font-bold ${
+              (step === 1 && !isAuthorized) ||
+              (step === 2 && prompt.trim() === "") ||
+              (step === 3 && !imageUrl)
+                ? "bg-violet-300 text-white cursor-not-allowed"
+                : "bg-violet-500 hover:bg-violet-700 text-white"
+            }`}
             onClick={handleNext}
+            disabled={
+              (step === 1 && !isAuthorized) ||
+              (step === 2 && prompt.trim() === "") ||
+              (step === 3 && !imageUrl)
+            }
           >
             Next
           </button>
         )}
-        {step === 2 && (
+        {step === 3 && (
           <button
             className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
               !isAuthorized || loading
@@ -462,7 +456,7 @@ const Hero = () => {
           </button>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

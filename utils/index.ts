@@ -11,14 +11,17 @@ interface User {
 
 export async function sendAudioToServer(
   audioBlob: Blob,
-  onTranscription: (transcription: string) => void
+  onTranscription: (
+    englishTranslation: string,
+    greekTranscription: string
+  ) => void
 ) {
   const formData = new FormData();
   formData.append("audioFile", audioBlob, "recording.webm");
 
   try {
     const response = await fetch(
-      "https://abovedigital-1696444393502.ew.r.appspot.com/transcribe-audio",
+      "https://https://abovedigital-1696444393502.ew.r.appspot.com/transcribe-audio",
       {
         method: "POST",
         body: formData,
@@ -32,8 +35,8 @@ export async function sendAudioToServer(
     }
 
     const data = await response.json();
-    // Handle the transcription data as needed
-    onTranscription(data.transcription);
+    // Call the callback with both transcriptions
+    onTranscription(data.transcription, data.originalTranscription);
   } catch (error) {
     console.error("Error sending audio to the server:", error);
   }
@@ -55,7 +58,7 @@ export async function fetchDataFromFirestore() {
 
 export async function fetchPaginatedImages(page: any, limit = 10) {
   const response = await fetch(
-    `https://abovedigital-1696444393502.ew.r.appspot.com/paginated-images?page=${page}&limit=${limit}`
+    `https://https://abovedigital-1696444393502.ew.r.appspot.com/paginated-images?page=${page}&limit=${limit}`
   );
   const data = await response.json();
   return data;
