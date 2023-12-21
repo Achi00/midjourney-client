@@ -237,7 +237,7 @@ const Hero = () => {
 
         {errorMessage && (
           <div
-            className="flex items-center p-4 mb-4 text-md text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
+            className="flex items-center p-4 mb-4 text-md text-red-800 border border-red-300 rounded-lg bg-red-50 "
             role="alert"
           >
             <svg
@@ -269,7 +269,7 @@ const Hero = () => {
               <svg
                 aria-hidden="true"
                 role="status"
-                className="inline w-8 h-8 me-3 text-gray-200 animate-spin dark:text-gray-600"
+                className="inline w-8 h-8 me-3 text-gray-200 animate-spin "
                 viewBox="0 0 100 101"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -355,9 +355,7 @@ const Hero = () => {
           )}
           {/* upload image */}
           {step === 3 &&
-            (resultImage ? //       onChange={handleImageChange} //       disabled={!isChecked} //       accept="image/*" //       type="file" //     <input //     <h1 className="font-bold text-white">Upload Again</h1> //     </div> //       <Image src={camera} alt="camera" width={70} height={30} /> //     <div className="flex flex-col items-center justify-center pt-5 pb-6"> //   > //     } gap-2 px-2`} //         : "bg-violet-300" //         ? "bg-violet-500  hover:bg-violet-400" //       isChecked //     className={`flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center ${ //   <label // <div className="flex justify-center items-center"> // Render a small button when resultImage is available
-            //       className="hidden"
-            //     />
+            (resultImage ? //     /> //       className="hidden" //       onChange={handleImageChange} //       disabled={!isChecked} //       accept="image/*" //       type="file" //     <input //     <h1 className="font-bold text-white">Upload Again</h1> //     </div> //       <Image src={camera} alt="camera" width={70} height={30} /> //     <div className="flex flex-col items-center justify-center pt-5 pb-6"> //   > //     } gap-2 px-2`} //         : "bg-violet-300" //         ? "bg-violet-500  hover:bg-violet-400" //       isChecked //     className={`flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center ${ //   <label // <div className="flex justify-center items-center"> // Render a small button when resultImage is available
             //   </label>
             // </div>
             null : imageUrl ? (
