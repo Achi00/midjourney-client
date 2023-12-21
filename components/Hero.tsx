@@ -444,10 +444,10 @@ const Hero = () => {
         )}
         {step === 3 && (
           <button
-            className={`bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
-              !isAuthorized || loading
+            className={`  text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
+              loading
                 ? "cursor-not-allowed bg-violet-300"
-                : "cursor-pointer"
+                : "cursor-pointer bg-violet-500 hover:bg-violet-700"
             }`}
             onClick={isAuthorized ? handleSubmit : authorizeError}
             disabled={!isAuthorized || loading}
