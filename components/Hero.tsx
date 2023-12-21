@@ -157,8 +157,12 @@ const Hero = () => {
 
   const handleSubmit = async () => {
     // Check if all required fields are filled
-    if (!name || !email || !image || !prompt) {
-      toast.error("All fields are required");
+    // if (!name || !email || !image || !prompt) {
+    //   toast.error("All fields are required");
+    //   return;
+    // }
+    if (!image) {
+      setErrorMessage("Image missing");
       return;
     }
 
@@ -219,6 +223,7 @@ const Hero = () => {
     setStep(2); // Navigate to the prompt input step
     setResultImage(null);
     setPrompt("");
+    setImage(null);
     setImageUrl(undefined);
   };
 
@@ -237,7 +242,7 @@ const Hero = () => {
 
         {errorMessage && (
           <div
-            className="flex items-center p-4 mb-4 text-md text-red-800 border border-red-300 rounded-lg bg-red-50 "
+            className="flex items-center p-4 mb-4 text-md text-red-800 border border-red-300 rounded-lg fadeIn bg-red-50 "
             role="alert"
           >
             <svg
@@ -355,10 +360,7 @@ const Hero = () => {
           )}
           {/* upload image */}
           {step === 3 &&
-            (resultImage ? //     /> //       className="hidden" //       onChange={handleImageChange} //       disabled={!isChecked} //       accept="image/*" //       type="file" //     <input //     <h1 className="font-bold text-white">Upload Again</h1> //     </div> //       <Image src={camera} alt="camera" width={70} height={30} /> //     <div className="flex flex-col items-center justify-center pt-5 pb-6"> //   > //     } gap-2 px-2`} //         : "bg-violet-300" //         ? "bg-violet-500  hover:bg-violet-400" //       isChecked //     className={`flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center ${ //   <label // <div className="flex justify-center items-center"> // Render a small button when resultImage is available
-            //   </label>
-            // </div>
-            null : imageUrl ? (
+            (resultImage ? null : imageUrl ? ( // </div> //   </label> //     /> //       className="hidden" //       onChange={handleImageChange} //       disabled={!isChecked} //       accept="image/*" //       type="file" //     <input //     <h1 className="font-bold text-white">Upload Again</h1> //     </div> //       <Image src={camera} alt="camera" width={70} height={30} /> //     <div className="flex flex-col items-center justify-center pt-5 pb-6"> //   > //     } gap-2 px-2`} //         : "bg-violet-300" //         ? "bg-violet-500  hover:bg-violet-400" //       isChecked //     className={`flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center ${ //   <label // <div className="flex justify-center items-center"> // Render a small button when resultImage is available
               // Render the small "Upload again" button and image preview when imageUrl is available
               <div className="flex flex-col gap-10 justify-center items-center">
                 {!loading && (
