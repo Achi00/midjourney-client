@@ -19,7 +19,7 @@ const ImagesPage = () => {
   const [data, setData] = useState<DataProps[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const limit = 10; // Number of items per page
+  const limit = 9; // Number of items per page
 
   // const fetchPaginatedData = async (
   //   page: number,

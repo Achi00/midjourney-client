@@ -33,6 +33,8 @@ const Hero = () => {
   const [loading, setLoading] = useState(false);
   const passcodeInputRef = useRef<HTMLInputElement>(null);
 
+  const [errorMessage, setErrorMessage] = useState("");
+
   // toggle between input and microphone
   const handleToggle = () => {
     setIsUsingSpeech(!isUsingSpeech); // Toggle between input and speech-to-text
@@ -53,6 +55,7 @@ const Hero = () => {
         );
         if (response.ok) {
           setIsAuthorized(true);
+          setStep((currentStep) => currentStep + 1);
           if (passcodeInputRef.current) {
             passcodeInputRef.current.style.border = "initial"; // Reset to initial style
           }
@@ -92,13 +95,13 @@ const Hero = () => {
     } else {
       toast.dismiss(); // Dismiss the loading toast before displaying the error message
       const errorData = await response.json();
-
       // Check for nested error structure
       const errorMessage =
         errorData.error && errorData.error.error
           ? errorData.error.error
           : errorData.error;
 
+      setErrorMessage(errorMessage);
       switch (errorMessage) {
         case "Each image should have exactly one face.":
           toast.error("Error: Each image should have exactly one face.");
@@ -110,6 +113,9 @@ const Hero = () => {
           break;
         case "No face detected":
           toast.error("Error: No face detected in the uploaded image.");
+          break;
+        case "Inappropriate content detected in the prompt.":
+          toast.error("Error: Inappropriate content detected in the prompt.");
           break;
         default:
           console.error("Unexpected error:", errorData);
@@ -133,6 +139,7 @@ const Hero = () => {
     if (file) {
       setImage(file);
       setImageUrl(URL.createObjectURL(file));
+      setResultImage(null);
       toast.success("Image selected");
     }
   };
@@ -181,10 +188,7 @@ const Hero = () => {
     }
   };
 
-  const handleTranscription = (
-    englishTranslation: string,
-    greekTranscription: string
-  ) => {
+  const handleTranscription = (englishTranslation: string) => {
     setPrompt(englishTranslation);
     setShoWAudio(englishTranslation);
   };
@@ -208,6 +212,27 @@ const Hero = () => {
         <Toaster />
 
         <Image src={Logo} width={150} height={150} alt="logo" />
+
+        {errorMessage && (
+          <div
+            className="flex items-center p-4 mb-4 text-md text-red-800 border border-red-300 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400 dark:border-red-800"
+            role="alert"
+          >
+            <svg
+              className="flex-shrink-0 inline w-4 h-4 me-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+            </svg>
+            <span className="sr-only">Info</span>
+            <div>
+              <span className="font-bold">Error:</span> {errorMessage}
+            </div>
+          </div>
+        )}
         {loading && (
           <button
             disabled
@@ -240,7 +265,7 @@ const Hero = () => {
           </div>
         )}
         {/* password */}
-        {step === 1 && (
+        {step === 1 && !isAuthorized && (
           <div className="flex flex-col items-center justify-center gap-3">
             <h1>Please verify password</h1>
             <div className="flex xl:flex-row lg:flex-row md:flex-row sm:flex-col xs:flex-col gap-6 h-15">
@@ -303,25 +328,41 @@ const Hero = () => {
             (resultImage ? (
               // Render a small button when resultImage is available
               <div className="flex justify-center items-center">
-                <button
-                  className="bg-violet-500 flex items-center gap-2 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg xl:text-lg lg:text-lg md:text-md sm:text-sm xs:text-sm"
-                  // Add your onClick or other event handlers here for resultImage
-                >
-                  <Image src={camera} alt="camera" width={40} height={40} />
-                  {/* Label for your button related to resultImage */}
-                  Upload Again
-                </button>
+                <label className="flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center bg-violet-500  hover:bg-violet-400 gap-2 px-2">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Image src={camera} alt="camera" width={30} height={30} />
+                  </div>
+                  <h1 className="font-bold text-white">Upload Again</h1>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
               </div>
             ) : imageUrl ? (
               // Render the small "Upload again" button and image preview when imageUrl is available
               <div className="flex flex-col gap-10 justify-center items-center">
-                <button
-                  className="bg-violet-500 flex items-center gap-2 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
-                  // Add your onClick or other event handlers here for imageUrl
-                >
-                  <Image src={camera} alt="camera" width={40} height={40} />
-                  Upload again
-                </button>
+                <label className="flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center bg-violet-500  hover:bg-violet-400 gap-2 px-2">
+                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <Image src={camera} alt="camera" width={30} height={30} />
+                  </div>
+                  {loading ? (
+                    <h1 className="font-bold text-white">Please Wait...</h1>
+                  ) : (
+                    <>
+                      <h1 className="font-bold text-white">Upload Again</h1>
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </>
+                  )}
+                </label>
                 <img
                   src={imageUrl}
                   alt="Preview"
@@ -415,7 +456,7 @@ const Hero = () => {
       </div>
       <div className="flex gap-5 pb-5 pt-2">
         {/* Navigation Buttons */}
-        {step > 1 && (
+        {step > 1 && (step !== 2 || !isAuthorized) && (
           <button
             className={`${
               loading
