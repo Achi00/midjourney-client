@@ -417,8 +417,13 @@ const Hero = () => {
         {/* Navigation Buttons */}
         {step > 1 && (
           <button
-            className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]"
+            className={`${
+              loading
+                ? "bg-violet-300 cursor-not-allowed"
+                : "bg-violet-500 hover:bg-violet-700"
+            } text-white font-bold py-2 px-4 border border-violet-900 rounded-lg w-[90px]`}
             onClick={handleBack}
+            disabled={loading}
           >
             Back
           </button>
@@ -452,7 +457,7 @@ const Hero = () => {
             onClick={isAuthorized ? handleSubmit : authorizeError}
             disabled={!isAuthorized || loading}
           >
-            {isAuthorized ? "Submit" : "Authorize First"}
+            Submit
           </button>
         )}
       </div>
