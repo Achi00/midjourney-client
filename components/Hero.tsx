@@ -44,7 +44,7 @@ const Hero = () => {
         toast.error("Please enter password");
       } else {
         const response = await fetch(
-          "https://https://abovedigital-1696444393502.ew.r.appspot.com/verify-passcode",
+          "https://abovedigital-1696444393502.ew.r.appspot.com/verify-passcode",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -165,7 +165,7 @@ const Hero = () => {
     try {
       setLoading(true);
       const response = await fetch(
-        "https://https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
+        "https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
         {
           method: "POST",
           body: formData,
