@@ -5,8 +5,9 @@ import SpeechToText from "./SpeechToText";
 import Image from "next/image";
 import Logo from "../utils/Logo.png";
 import camera from "../utils/camera.png";
-import { FacebookShareButton } from "next-share";
+
 import DownloadButton from "./Download";
+import LightBox from "./LightBox";
 
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
@@ -17,8 +18,7 @@ const Hero = () => {
   const [name, setName] = useState<string>("test");
   const [email, setEmail] = useState<string>("test@gmail.com");
   // final image state
-  const [resultImage, setResultImage] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  const [resultImage, setResultImage] = useState<string | null>();
   // easy authentication
   const [passcode, setPasscode] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -35,6 +35,9 @@ const Hero = () => {
   const [isChecked, setIsChecked] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState("");
+  const [isInfoClosed, setisInfoClosed] = useState(false);
+  // check lightbox
+  const [isOpen, setIsOpen] = useState(false);
 
   // change prompt input stlye in case of inappropriate prompt
   const [promptInputClass, setPromptInputClass] =
@@ -60,7 +63,7 @@ const Hero = () => {
         );
         if (response.ok) {
           setIsAuthorized(true);
-          setStep((currentStep) => currentStep + 1);
+          setStep(2);
           if (passcodeInputRef.current) {
             passcodeInputRef.current.style.border = "initial"; // Reset to initial style
           }
@@ -227,6 +230,18 @@ const Hero = () => {
     setImageUrl(undefined);
   };
 
+  const CloseInfo = () => {
+    setisInfoClosed(true);
+  };
+
+  const openLightbox = () => {
+    setIsOpen(true);
+  };
+
+  const closeLightbox = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
       <div className="w-full flex justify-center items-center flex-col gap-[7vmin]">
@@ -292,11 +307,6 @@ const Hero = () => {
             </button>
           </div>
         )}
-        {error && (
-          <div>
-            <div className="alert alert-danger">{error}</div>
-          </div>
-        )}
         {/* password */}
         {step === 1 && !isAuthorized && (
           <div className="flex flex-col items-center justify-center gap-3">
@@ -336,7 +346,7 @@ const Hero = () => {
                   )}
                   <SpeechToText
                     onTranscription={handleTranscription}
-                    onOriginalTranscription={handleOriginalTranscription} // Provide this function
+                    onOriginalTranscription={handleOriginalTranscription}
                     isAuthorized={isAuthorized}
                   />
                 </>
@@ -360,8 +370,7 @@ const Hero = () => {
           )}
           {/* upload image */}
           {step === 3 &&
-            (resultImage ? null : imageUrl ? ( // </div> //   </label> //     /> //       className="hidden" //       onChange={handleImageChange} //       disabled={!isChecked} //       accept="image/*" //       type="file" //     <input //     <h1 className="font-bold text-white">Upload Again</h1> //     </div> //       <Image src={camera} alt="camera" width={70} height={30} /> //     <div className="flex flex-col items-center justify-center pt-5 pb-6"> //   > //     } gap-2 px-2`} //         : "bg-violet-300" //         ? "bg-violet-500  hover:bg-violet-400" //       isChecked //     className={`flex w-full items-center justify-center border-2 rounded-lg cursor-pointer text-center ${ //   <label // <div className="flex justify-center items-center"> // Render a small button when resultImage is available
-              // Render the small "Upload again" button and image preview when imageUrl is available
+            (resultImage ? null : imageUrl ? (
               <div className="flex flex-col gap-10 justify-center items-center">
                 {!loading && (
                   <label
@@ -395,32 +404,79 @@ const Hero = () => {
               </div>
             ) : (
               // Render the image upload section when neither imageUrl nor resultImage is set
-              <div className="flex flex-col xl:gap-[10vmin] lg:gap-[10vmin] md:gap-[10vmin] sm:gap-[10vmin] xs:gap-[10vmin] py-[5vmin] fadeIn items-center justify-center w-[250px]">
-                <div className="flex text-center">
-                  <input
-                    type="checkbox"
-                    checked={isChecked}
-                    onChange={(e) => setIsChecked(e.target.checked)}
-                    className="mr-2"
-                  />
-                  <p className="text-sm">
-                    I Agree{" "}
-                    <a
-                      href="https://abovedigital.io/privacy-policy/"
-                      target="_blank"
-                      rel="noopener noreferrer"
+              <div className="flex flex-col xl:gap-[5vmin] lg:gap-[5vmin] md:gap-[8vmin] sm:gap-[5vmin] xs:gap-[10vmin]  fadeIn items-center justify-center w-[250px]">
+                <div className="flex flex-col items-center justify-center gap-3">
+                  <div
+                    id="alert-1"
+                    className={`items-center fadeOut p-4 mb-4 text-white font-bold rounded-lg bg-violet-500  ${
+                      isInfoClosed ? "hidden" : "flex"
+                    }`}
+                    role="alert"
+                  >
+                    <svg
+                      className="flex-shrink-0 w-4 h-4"
+                      aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
                     >
-                      <span className="text-violet-700 hover:underline decoration-1 cursor-pointer">
-                        Terms and Conditions
-                      </span>
-                    </a>
-                  </p>
+                      <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                    </svg>
+                    <span className="sr-only">Info</span>
+                    <div className="ms-3 text-sm text-white">
+                      Make sure nothing is covering your face.
+                    </div>
+                    <button
+                      type="button"
+                      className="ms-auto -mx-1.5 -my-1.5  text-white rounded-lg focus:ring-2 inline-flex items-center justify-center h-8 w-8"
+                      data-dismiss-target="#alert-1"
+                      aria-label="Close"
+                      onClick={CloseInfo}
+                    >
+                      <span className="sr-only">Close</span>
+                      <svg
+                        className="w-3 h-3"
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 14 14"
+                      >
+                        <path
+                          stroke="currentColor"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="flex text-center">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => setIsChecked(e.target.checked)}
+                      className="mr-2"
+                    />
+                    <p className="text-sm">
+                      I Agree To{" "}
+                      <a
+                        href="https://abovedigital.io/privacy-policy/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="text-violet-700 hover:underline decoration-1 cursor-pointer">
+                          Terms and Conditions
+                        </span>
+                      </a>
+                    </p>
+                  </div>
                 </div>
                 <h1 className="font-bold text-center text-lg">
                   Take Selfie Or Upload Image
                 </h1>
                 <label
-                  className={`flex w-[30vmin] flex-col items-center justify-center  rounded-lg text-center ${
+                  className={`flex xl:w-[30vmin] lg:w-[30vmin] md:w-[40vmin] sm:w-full xs:w-full flex-col items-center justify-center  rounded-lg text-center ${
                     isChecked
                       ? "bg-violet-600 cursor-pointer "
                       : "bg-violet-300 cursor-not-allowed"
@@ -453,12 +509,25 @@ const Hero = () => {
 
           {resultImage && (
             <>
-              <img
-                className="rounded-lg border-3 border-violet-950"
+              <Image
+                className="rounded-lg cursor-pointer border-3 border-violet-950"
                 width={750}
+                height={400}
                 src={resultImage}
                 alt="Result"
+                onClick={() => openLightbox()}
               />
+              {isOpen && (
+                <LightBox isOpen={isOpen} onClose={closeLightbox}>
+                  <Image
+                    className="rounded-lg"
+                    width={750}
+                    height={400}
+                    src={resultImage}
+                    alt="Result"
+                  />
+                </LightBox>
+              )}
               <DownloadButton imageUrl={resultImage} />
             </>
           )}
