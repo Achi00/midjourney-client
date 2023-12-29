@@ -11,7 +11,11 @@ const Page = () => {
     null
   );
   const [lightboxActive, setLightboxActive] = useState(false);
+  let cycleImagesTimer: any = null;
 
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Fetch images from the server
   const fetchNextImageUrls = async () => {
     try {
       const response = await fetch("http://localhost:8080/next-image-url");
@@ -19,14 +23,21 @@ const Page = () => {
       const data = await response.json();
 
       if (data.imageUrls.length > 0) {
-        setImageUrls((prevImageUrls) => {
-          let updatedImageUrls = [...data.imageUrls, ...prevImageUrls];
-          updatedImageUrls = Array.from(new Set(updatedImageUrls));
-          if (updatedImageUrls.length > 14) updatedImageUrls.length = 14;
-          while (updatedImageUrls.length < 14) updatedImageUrls.push(null);
-          return updatedImageUrls;
-        });
-        setLightboxActive(false); // Reset lightbox state
+        const newImages = data.imageUrls.filter(
+          (url: string) => !imageUrls.includes(url)
+        );
+
+        console.log("New images fetched:", newImages);
+
+        if (newImages.length > 0) {
+          setImageUrls((prevImageUrls) => {
+            let updatedImageUrls = [...data.imageUrls, ...prevImageUrls];
+            updatedImageUrls = Array.from(new Set(updatedImageUrls));
+            if (updatedImageUrls.length > 14) updatedImageUrls.length = 14;
+            while (updatedImageUrls.length < 14) updatedImageUrls.push(null);
+            return updatedImageUrls;
+          });
+        }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -45,49 +56,56 @@ const Page = () => {
   };
 
   useEffect(() => {
-    // Fetch initial data
     fetchQrCode();
     fetchNextImageUrls();
-
-    // Set up interval to fetch new image URLs every 10 seconds
     const intervalId = setInterval(fetchNextImageUrls, 10000);
-
-    return () => {
-      clearInterval(intervalId);
-    };
+    return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    // Function to start lightbox cycle
-    const startLightboxCycle = () => {
-      const firstImageIndex = imageUrls.findIndex((url) => url !== null);
-      if (firstImageIndex !== -1) {
-        setSelectedImageIndex(firstImageIndex);
-        setLightboxActive(true);
-        cycleImages(firstImageIndex);
-      }
-    };
+  // Function to cycle through images
+  const cycleImages = () => {
+    const nonNullImages = imageUrls.filter((url) => url !== null);
+    if (nonNullImages.length > 0) {
+      const nextIndex = (selectedImageIndex ?? 0) + 1;
+      setSelectedImageIndex(nextIndex % nonNullImages.length);
+    }
+  };
 
-    // Start the lightbox cycle after 10 seconds of inactivity
+  // Start cycling when lightbox is active
+  useEffect(() => {
+    if (lightboxActive) {
+      cycleImagesTimer = setInterval(cycleImages, 5000); // Cycle every 5 seconds
+    }
+    return () => {
+      if (cycleImagesTimer) clearInterval(cycleImagesTimer);
+    };
+  }, [lightboxActive, imageUrls]);
+
+  // Start lightbox cycle after 10 seconds of inactivity
+  useEffect(() => {
     const timer = setTimeout(() => {
       if (!lightboxActive && imageUrls.some((url) => url !== null)) {
-        startLightboxCycle();
+        setLightboxActive(true);
+        cycleImages(); // Start with first image
       }
     }, 10000);
-
     return () => clearTimeout(timer);
   }, [lightboxActive, imageUrls]);
 
-  // Cycle through images every 5 seconds
-  const cycleImages = (index: any) => {
-    if (!lightboxActive || imageUrls.every((url) => url === null)) return;
-
-    const nextIndex = (index + 1) % imageUrls.length;
-    setTimeout(() => {
-      setSelectedImageIndex(imageUrls[nextIndex] ? nextIndex : 0);
-      cycleImages(nextIndex);
-    }, 5000);
+  const logImageUrls = () => {
+    const nonNullImages = imageUrls.filter((url) => url !== null);
+    if (nonNullImages.length > 0) {
+      console.log(
+        "images:" + nonNullImages[currentIndex % nonNullImages.length]
+      );
+      setCurrentIndex((prevIndex) => prevIndex + 1);
+    }
   };
+
+  useEffect(() => {
+    const intervalId = setInterval(logImageUrls, 5000); // Log every 5 seconds
+    return () => clearInterval(intervalId);
+  }, [imageUrls, currentIndex]);
 
   // Animation variants for Framer Motion
   const backdropVariant = {
@@ -129,20 +147,23 @@ const Page = () => {
 
       <AnimatePresence>
         {selectedImage && (
-          <motion.div
-            className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50"
-            variants={backdropVariant}
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-          >
-            <motion.img
-              src={selectedImage}
-              alt="Enlarged Image"
-              className="max-w-2/3 max-h-2/3 rounded-xl"
-              variants={imageVariant}
-            />
-          </motion.div>
+          <>
+            {console.log("Displaying lightbox for image:", selectedImage)}
+            <motion.div
+              className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50"
+              variants={backdropVariant}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              <motion.img
+                src={selectedImage}
+                alt="Enlarged Image"
+                className="w-[800px] rounded-xl"
+                variants={imageVariant}
+              />
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </div>
