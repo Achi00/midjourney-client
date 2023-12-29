@@ -5,6 +5,7 @@ import SpeechToText from "./SpeechToText";
 import Image from "next/image";
 import Logo from "../utils/Logo.png";
 import camera from "../utils/camera.png";
+import start from "../utils/start.png";
 
 import DownloadButton from "./Download";
 import LightBox from "./LightBox";
@@ -225,6 +226,7 @@ const Hero = () => {
     setPrompt("");
     setImage(null);
     setImageUrl(undefined);
+    setIsChecked(false);
   };
 
   const CloseInfo = () => {
@@ -392,12 +394,14 @@ const Hero = () => {
                     />
                   </label>
                 )}
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  style={{ maxWidth: "100%", maxHeight: "250px" }}
-                  className="rounded-md border border-violet-700"
-                />
+                {!loading && (
+                  <img
+                    src={imageUrl}
+                    alt="Preview"
+                    style={{ maxWidth: "100%", maxHeight: "250px" }}
+                    className="rounded-md border border-violet-700"
+                  />
+                )}
               </div>
             ) : (
               // Render the image upload section when neither imageUrl nor resultImage is set
@@ -448,6 +452,8 @@ const Hero = () => {
                       </svg>
                     </button>
                   </div>
+                </div>
+                <div className="flex flex-col gap-4">
                   <div className="flex text-center">
                     <input
                       type="checkbox"
@@ -468,10 +474,11 @@ const Hero = () => {
                       </a>
                     </p>
                   </div>
+                  <h1 className="font-bold text-center text-lg">
+                    Take Selfie Or Upload Image
+                  </h1>
                 </div>
-                <h1 className="font-bold text-center text-lg">
-                  Take Selfie Or Upload Image
-                </h1>
+
                 <label
                   className={`flex xl:w-[30vmin] lg:w-[30vmin] md:w-[40vmin] sm:w-full xs:w-full flex-col items-center justify-center  rounded-lg text-center ${
                     isChecked
@@ -494,12 +501,16 @@ const Hero = () => {
             ))}
 
           {step === 3 && resultImage && (
-            <button
-              className="bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
-              onClick={startOver}
-            >
-              Start Over
-            </button>
+            <div className="flex gap-5 xl:flex-row md:flex-row sm:flex-col xs:flex-col">
+              <button
+                className="flex gap-2 items-center bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
+                onClick={startOver}
+              >
+                <Image src={start} alt="start" width={25} height={25} />
+                Start Over
+              </button>
+              <DownloadButton imageUrl={resultImage} />
+            </div>
           )}
 
           {/* user image preview */}
@@ -525,7 +536,6 @@ const Hero = () => {
                   />
                 </LightBox>
               )}
-              <DownloadButton imageUrl={resultImage} />
             </>
           )}
         </div>

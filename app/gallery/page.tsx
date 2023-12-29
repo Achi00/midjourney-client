@@ -46,7 +46,7 @@ const ImagesPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
-        `http://192.168.42.235:8080/paginated-images?page=${currentPage}&limit=${limit}`
+        `http://localhost:8080/paginated-images?page=${currentPage}&limit=${limit}`
       );
       if (!response.ok) {
         throw new Error("Server error");
