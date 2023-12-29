@@ -71,25 +71,32 @@ const Page = () => {
     }
   };
 
-  // Start cycling when lightbox is active
   useEffect(() => {
-    if (lightboxActive) {
-      cycleImagesTimer = setInterval(cycleImages, 5000); // Cycle every 5 seconds
-    }
-    return () => {
-      if (cycleImagesTimer) clearInterval(cycleImagesTimer);
-    };
-  }, [lightboxActive, imageUrls]);
-
-  // Start lightbox cycle after 10 seconds of inactivity
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!lightboxActive && imageUrls.some((url) => url !== null)) {
+    // Function to start lightbox cycle
+    const startLightboxCycle = () => {
+      if (imageUrls.some((url) => url !== null)) {
         setLightboxActive(true);
-        cycleImages(); // Start with first image
+        setSelectedImageIndex(0);
       }
-    }, 10000);
-    return () => clearTimeout(timer);
+    };
+
+    // Check if lightbox should start or cycle
+    if (lightboxActive) {
+      // Start cycling images if lightbox is active
+      console.log("Starting image cycling");
+      cycleImagesTimer = setInterval(cycleImages, 5000);
+    } else {
+      // Start the lightbox cycle after 10 seconds of inactivity
+      const timer = setTimeout(startLightboxCycle, 10000);
+      return () => clearTimeout(timer);
+    }
+
+    return () => {
+      if (cycleImagesTimer) {
+        console.log("Clearing cycle images timer");
+        clearInterval(cycleImagesTimer);
+      }
+    };
   }, [lightboxActive, imageUrls]);
 
   const logImageUrls = () => {
@@ -121,8 +128,23 @@ const Page = () => {
   const selectedImage =
     selectedImageIndex !== null ? imageUrls[selectedImageIndex] : null;
 
+  const closeLightbox = () => {
+    console.log("Closing lightbox");
+    setLightboxActive(false);
+    if (cycleImagesTimer) {
+      clearInterval(cycleImagesTimer);
+      cycleImagesTimer = null;
+    }
+  };
+
   return (
     <div className="relative grid grid-cols-3 grid-rows-5 h-screen">
+      <button
+        onClick={closeLightbox}
+        className="absolute cursor-pointer bg-violet-600 rounded-lg text-white text-lg font-bold p-4 top-5 right-5 z-[51]"
+      >
+        Close Lightbox
+      </button>
       {imageUrls.map((url, index) => {
         const isQrCodePosition = index === 7;
 
@@ -146,7 +168,7 @@ const Page = () => {
       })}
 
       <AnimatePresence>
-        {selectedImage && (
+        {lightboxActive && selectedImage && (
           <>
             {console.log("Displaying lightbox for image:", selectedImage)}
             <motion.div
