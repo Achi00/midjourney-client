@@ -14,6 +14,7 @@ const Page = () => {
   let cycleImagesTimer: any = null;
 
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [lastFetchTime, setLastFetchTime] = useState(Date.now());
 
   // Fetch images from the server
   const fetchNextImageUrls = async () => {
@@ -23,27 +24,40 @@ const Page = () => {
       const data = await response.json();
 
       if (data.imageUrls.length > 0) {
-        const newImages = data.imageUrls.filter(
-          (url: string) => !imageUrls.includes(url)
-        );
+        setImageUrls((prevImageUrls) => {
+          // Determine the new images
+          const newImages = data.imageUrls.filter(
+            (url: string) => !prevImageUrls.includes(url)
+          );
 
-        console.log("New images fetched:", newImages);
+          if (newImages.length > 0) {
+            console.log("New images fetched:", newImages);
 
-        if (newImages.length > 0) {
-          setImageUrls((prevImageUrls) => {
-            let updatedImageUrls = [...data.imageUrls, ...prevImageUrls];
-            updatedImageUrls = Array.from(new Set(updatedImageUrls));
-            if (updatedImageUrls.length > 14) updatedImageUrls.length = 14;
-            while (updatedImageUrls.length < 14) updatedImageUrls.push(null);
+            // Combine new and old URLs, and ensure the array doesn't exceed 14 items
+            let updatedImageUrls = [...newImages, ...prevImageUrls].slice(
+              0,
+              14
+            );
             return updatedImageUrls;
-          });
-        }
+          } else {
+            console.log("No new images fetched");
+            return prevImageUrls; // Return previous state if no new images
+          }
+        });
       }
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
+  // UseEffect to close lightbox when new images are added
+  useEffect(() => {
+    if (imageUrls.some((url) => url !== null)) {
+      closeLightbox();
+    }
+  }, [imageUrls]);
+
+  // fetch qr code
   const fetchQrCode = async () => {
     try {
       const response = await fetch("http://localhost:8080/qr");
@@ -54,7 +68,7 @@ const Page = () => {
       console.error("Error:", error);
     }
   };
-
+  // execute and set timeout
   useEffect(() => {
     fetchQrCode();
     fetchNextImageUrls();
@@ -170,7 +184,6 @@ const Page = () => {
       <AnimatePresence>
         {lightboxActive && selectedImage && (
           <>
-            {console.log("Displaying lightbox for image:", selectedImage)}
             <motion.div
               className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50"
               variants={backdropVariant}
