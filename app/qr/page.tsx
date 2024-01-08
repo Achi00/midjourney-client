@@ -79,9 +79,11 @@ const Page = () => {
   // Function to cycle through images
   const cycleImages = () => {
     const nonNullImages = imageUrls.filter((url) => url !== null);
-    if (nonNullImages.length > 0) {
-      const nextIndex = (selectedImageIndex ?? 0) + 1;
-      setSelectedImageIndex(nextIndex % nonNullImages.length);
+    if (nonNullImages.length > 1) {
+      // Ensure there is more than one image to cycle through
+      let nextIndex = (selectedImageIndex ?? 0) + 1;
+      nextIndex = nextIndex % nonNullImages.length; // Wrap around if it reaches the end
+      setSelectedImageIndex(nextIndex);
     }
   };
 
@@ -90,19 +92,20 @@ const Page = () => {
     const startLightboxCycle = () => {
       if (imageUrls.some((url) => url !== null)) {
         setLightboxActive(true);
-        setSelectedImageIndex(0);
+        setSelectedImageIndex(0); // Start from the first image
       }
     };
 
-    // Check if lightbox should start or cycle
     if (lightboxActive) {
-      // Start cycling images if lightbox is active
       console.log("Starting image cycling");
       cycleImagesTimer = setInterval(cycleImages, 5000);
     } else {
       // Start the lightbox cycle after 10 seconds of inactivity
       const timer = setTimeout(startLightboxCycle, 10000);
-      return () => clearTimeout(timer);
+      return () => {
+        console.log("Clearing timer for starting lightbox cycle");
+        clearTimeout(timer);
+      };
     }
 
     return () => {
@@ -111,7 +114,7 @@ const Page = () => {
         clearInterval(cycleImagesTimer);
       }
     };
-  }, [lightboxActive, imageUrls]);
+  }, [lightboxActive, imageUrls, selectedImageIndex]); // Include selectedImageIndex in dependencies
 
   const logImageUrls = () => {
     const nonNullImages = imageUrls.filter((url) => url !== null);
@@ -153,12 +156,6 @@ const Page = () => {
 
   return (
     <div className="relative grid grid-cols-3 grid-rows-5 h-screen">
-      {/* <button
-        onClick={closeLightbox}
-        className="absolute cursor-pointer bg-violet-600 rounded-lg text-white text-lg font-bold p-4 top-5 right-5 z-[51]"
-      >
-        Close Lightbox
-      </button> */}
       {imageUrls.map((url, index) => {
         const isQrCodePosition = index === 7;
 
@@ -172,11 +169,7 @@ const Page = () => {
                 alt={`Generated Image ${index}`}
                 className="object-cover w-full h-full cursor-pointer"
               />
-            ) : (
-              <div className="flex items-center justify-center w-full h-full">
-                <Image src={Logo} alt="logo" width={100} height={100} />
-              </div>
-            )}
+            ) : null}
           </div>
         );
       })}
