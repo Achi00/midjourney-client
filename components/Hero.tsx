@@ -54,11 +54,14 @@ const Hero = () => {
       if (!passcode) {
         toast.error("Please enter password");
       } else {
-        const response = await fetch("http://localhost:8080/verify-passcode", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ passcode }),
-        });
+        const response = await fetch(
+          "https://abovedigital-1696444393502.ew.r.appspot.com/verify-passcode",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ passcode }),
+          }
+        );
         if (response.ok) {
           setIsAuthorized(true);
           setStep(2);
@@ -186,7 +189,7 @@ const Hero = () => {
       setPromptInputClass("");
       setErrorMessage("");
       const response = await fetch(
-        "http://localhost:8080/generate-and-swap-face",
+        "https://abovedigital-1696444393502.ew.r.appspot.com/generate-and-swap-face",
         {
           method: "POST",
           body: formData,

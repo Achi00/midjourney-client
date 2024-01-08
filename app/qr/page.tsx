@@ -19,8 +19,10 @@ const Page = () => {
   // Fetch images from the server
   const fetchNextImageUrls = async () => {
     try {
-      const response = await fetch("http://localhost:8080/next-image-url");
-      if (!response.ok) throw new Error("No new images available");
+      const response = await fetch(
+        "https://abovedigital-1696444393502.ew.r.appspot.com/next-image-url"
+      );
+      if (!response.ok) console.log("No new images available");
       const data = await response.json();
 
       if (data.imageUrls.length > 0) {
@@ -60,7 +62,9 @@ const Page = () => {
   // fetch qr code
   const fetchQrCode = async () => {
     try {
-      const response = await fetch("http://localhost:8080/qr");
+      const response = await fetch(
+        "https://abovedigital-1696444393502.ew.r.appspot.com/qr"
+      );
       if (!response.ok) throw new Error("Error fetching QR code");
       const qrCodeHtml = await response.text();
       setQrCode(qrCodeHtml);
