@@ -153,12 +153,12 @@ const Page = () => {
 
   return (
     <div className="relative grid grid-cols-3 grid-rows-5 h-screen">
-      <button
+      {/* <button
         onClick={closeLightbox}
         className="absolute cursor-pointer bg-violet-600 rounded-lg text-white text-lg font-bold p-4 top-5 right-5 z-[51]"
       >
         Close Lightbox
-      </button>
+      </button> */}
       {imageUrls.map((url, index) => {
         const isQrCodePosition = index === 7;
 
