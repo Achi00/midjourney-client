@@ -14,7 +14,6 @@ const Page = () => {
   let cycleImagesTimer: any = null;
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [lastFetchTime, setLastFetchTime] = useState(Date.now());
 
   // Fetch images from the server
   const fetchNextImageUrls = async () => {
