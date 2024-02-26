@@ -56,7 +56,7 @@ const SpeechToText = ({
               // Inside SpeechToText.tsx
               sendAudioToServer(
                 audioBlob,
-                (englishTranslation, greekTranscription) => {
+                (englishTranslation: any, greekTranscription: any) => {
                   onTranscription(englishTranslation, greekTranscription);
                   if (onOriginalTranscription) {
                     onOriginalTranscription(greekTranscription);
