@@ -54,14 +54,11 @@ const ImagesPage = () => {
       const { images, totalPages } = await response.json();
       // console.log(images);
       setData(images);
-      console.log("data:", data);
       setTotalPages(totalPages);
     };
 
     fetchData();
   }, [currentPage, limit]);
-
-  console.log("updated data:", data);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {

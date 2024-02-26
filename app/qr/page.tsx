@@ -1,55 +1,66 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import Logo from "../../utils/Logo.png";
+import { db } from "../firebaseConfig";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 const Page = () => {
-  const [imageUrls, setImageUrls] = useState(new Array(15).fill(null));
+  const [imageUrls, setImageUrls] = useState([]);
+  console.log(imageUrls);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null
   );
   const [lightboxActive, setLightboxActive] = useState(false);
+
   let cycleImagesTimer: any = null;
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // firebase fetch new images
+  const fetchNewestImages = async () => {
+    const imagesRef = collection(db, "images"); // 'images' is your collection name
+    const q = query(imagesRef, orderBy("createdAt", "desc"), limit(14));
 
-  // Fetch images from the server
-  const fetchNextImageUrls = async () => {
-    try {
-      const response = await fetch(
-        "https://abovedigital-1696444393502.ew.r.appspot.com/next-image-url"
-      );
-      if (!response.ok) console.log("No new images available");
-      const data = await response.json();
+    const querySnapshot = await getDocs(q);
+    const images: any = [];
+    querySnapshot.forEach((doc) => {
+      images.push(doc.data().imageUrl); // Extracting the 'imageUrl'
+    });
 
-      if (data.imageUrls.length > 0) {
-        setImageUrls((prevImageUrls) => {
-          // Determine the new images
-          const newImages = data.imageUrls.filter(
-            (url: string) => !prevImageUrls.includes(url)
-          );
-
-          if (newImages.length > 0) {
-            console.log("New images fetched:", newImages);
-
-            // Combine new and old URLs, and ensure the array doesn't exceed 14 items
-            let updatedImageUrls = [...newImages, ...prevImageUrls].slice(
-              0,
-              14
-            );
-            return updatedImageUrls;
-          } else {
-            console.log("No new images fetched");
-            return prevImageUrls; // Return previous state if no new images
-          }
-        });
-      }
-    } catch (error) {
-      console.error("Error:", error);
-    }
+    return images;
   };
+
+  // fetch in every 10 seconds from firestore database
+  useEffect(() => {
+    const fetchAndSetImages = async () => {
+      const fetchedImages = await fetchNewestImages();
+      setImageUrls((currentImages: any) => {
+        // Check if there are new images
+        const newImages = fetchedImages.filter(
+          (img: any) => !currentImages.includes(img)
+        );
+
+        if (newImages.length > 0) {
+          // If there are new images, add them to the beginning of the array
+          // and remove the oldest images to maintain a length of 14
+          return [...newImages, ...currentImages].slice(0, 14);
+        }
+
+        // If no new images, just return the current images
+        return currentImages;
+      });
+    };
+
+    // Initial fetch
+    fetchAndSetImages();
+    // fetch qr
+    fetchQrCode();
+
+    // Set up polling
+    const intervalId = setInterval(fetchAndSetImages, 10000); // Poll every 10 seconds
+
+    // Clear interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
   // UseEffect to close lightbox when new images are added
   useEffect(() => {
@@ -71,13 +82,6 @@ const Page = () => {
       console.error("Error:", error);
     }
   };
-  // execute and set timeout
-  useEffect(() => {
-    fetchQrCode();
-    fetchNextImageUrls();
-    const intervalId = setInterval(fetchNextImageUrls, 10000);
-    return () => clearInterval(intervalId);
-  }, []);
 
   // Function to cycle through images
   const cycleImages = () => {
@@ -119,21 +123,6 @@ const Page = () => {
     };
   }, [lightboxActive, imageUrls, selectedImageIndex]); // Include selectedImageIndex in dependencies
 
-  const logImageUrls = () => {
-    const nonNullImages = imageUrls.filter((url) => url !== null);
-    if (nonNullImages.length > 0) {
-      console.log(
-        "images:" + nonNullImages[currentIndex % nonNullImages.length]
-      );
-      setCurrentIndex((prevIndex) => prevIndex + 1);
-    }
-  };
-
-  useEffect(() => {
-    const intervalId = setInterval(logImageUrls, 5000); // Log every 5 seconds
-    return () => clearInterval(intervalId);
-  }, [imageUrls, currentIndex]);
-
   // Animation variants for Framer Motion
   const backdropVariant = {
     hidden: { opacity: 0 },
@@ -159,23 +148,38 @@ const Page = () => {
 
   return (
     <div className="relative grid grid-cols-3 grid-rows-5 h-screen">
-      {imageUrls.map((url, index) => {
-        const isQrCodePosition = index === 7;
-
-        return (
-          <div key={index} className="col-span-1 row-span-1">
-            {isQrCodePosition ? (
-              <div dangerouslySetInnerHTML={{ __html: qrCode || "" }} />
-            ) : url ? (
-              <img
-                src={url}
-                alt={`Generated Image ${index}`}
-                className="object-cover w-full h-full cursor-pointer"
-              />
-            ) : null}
-          </div>
-        );
-      })}
+      {imageUrls.slice(0, 7).map((url, index) => (
+        <div key={index} className="col-span-1 row-span-1">
+          <img
+            src={url}
+            alt={`Generated Image ${index}`}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      ))}
+      {/* qr code in middle */}
+      <div key="qr" className="col-span-1 row-span-1">
+        <div dangerouslySetInnerHTML={{ __html: qrCode || "" }} />
+      </div>
+      {/* Render images after the QR code */}
+      {imageUrls.slice(7).map((url, index) => (
+        <div key={index + 8} className="col-span-1 row-span-1">
+          {" "}
+          {/* Start keys at index + 8 */}
+          <img
+            src={url}
+            alt={`Generated Image ${index + 8}`}
+            className="object-cover w-full h-full"
+          />
+        </div>
+      ))}
+      {/* {imageUrls.map((url, index) => (
+        <img
+          src={url}
+          alt={`Generated Image ${index}`}
+          className="object-cover w-full h-full cursor-pointer"
+        />
+      ))} */}
 
       <AnimatePresence>
         {lightboxActive && selectedImage && (

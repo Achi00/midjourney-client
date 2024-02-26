@@ -92,7 +92,6 @@ const Hero = () => {
   const handleResponse = async (response: any) => {
     if (response.ok) {
       const data = await response.json();
-      console.log("Response data:", data);
       if (data.imageUrl) {
         setResultImage(data.imageUrl);
         toast.dismiss(); // Dismiss the loading toast
@@ -212,7 +211,7 @@ const Hero = () => {
 
   const handleOriginalTranscription = (greekTranscription: string) => {
     // Handle the Greek transcription here
-    console.log("Greek Transcription:", greekTranscription);
+    // console.log("Greek Transcription:", greekTranscription);
   };
 
   const authorizeError = () => {
