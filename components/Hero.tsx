@@ -16,8 +16,8 @@ const Hero = () => {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
   // enter fields
   const [prompt, setPrompt] = useState<string>("");
-  const [name, setName] = useState<string>("test");
-  const [email, setEmail] = useState<string>("test@gmail.com");
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   // final image state
   const [resultImage, setResultImage] = useState<string | null>();
   // easy authentication
@@ -360,7 +360,19 @@ const Hero = () => {
                   placeholder="Write your imagination"
                 />
               )}
-
+              <div className="flex flex-col gap-2">
+                <label htmlFor="email" className="font-bold">
+                  Email:
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                />
+              </div>
               <button
                 onClick={handleToggle}
                 className=" border border-violet-900 p-2 rounded-md text-black"
