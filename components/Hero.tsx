@@ -10,6 +10,8 @@ import start from "../utils/start.png";
 import DownloadButton from "./Download";
 import LightBox from "./LightBox";
 
+import axios from "axios";
+
 const Hero = () => {
   const [image, setImage] = useState<File | null>(null);
   // for user image preview
@@ -19,7 +21,7 @@ const Hero = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   // final image state
-  const [resultImage, setResultImage] = useState<string | null>();
+  const [resultImage, setResultImage] = useState<string | null>("");
   // easy authentication
   const [passcode, setPasscode] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -31,6 +33,7 @@ const Hero = () => {
   const [showAudio, setShoWAudio] = useState("");
   // loading
   const [loading, setLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
   const passcodeInputRef = useRef<HTMLInputElement>(null);
   // terms and conditions checking
   const [isChecked, setIsChecked] = useState(false);
@@ -170,11 +173,11 @@ const Hero = () => {
     }
 
     // Simple email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Invalid email address");
-      return;
-    }
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // if (!emailRegex.test(email)) {
+    //   toast.error("Invalid email address");
+    //   return;
+    // }
 
     // Only show the loading toast after passing the validation checks
 
@@ -182,7 +185,7 @@ const Hero = () => {
     formData.append("userImage", image);
     formData.append("prompt", prompt);
     formData.append("name", name);
-    formData.append("email", email);
+    // formData.append("email", email);
     try {
       setLoading(true);
       setPromptInputClass("");
@@ -219,6 +222,32 @@ const Hero = () => {
     if (passcodeInputRef.current) {
       passcodeInputRef.current.style.border = "2px solid red";
       passcodeInputRef.current.focus();
+    }
+  };
+
+  const handleEmail = async (e: any) => {
+    e.preventDefault();
+
+    try {
+      setEmailLoading(true);
+      const emailResponse = await axios.post(
+        "https://abovedigital-1696444393502.ew.r.appspot.com/v1/mail",
+        {
+          toEmail: email,
+          subject: "AI Imaginarium",
+          message: "Your Generated Image",
+          imageUrl: resultImage,
+        }
+      );
+
+      console.log("Email sent successfully", emailResponse.data);
+      toast.success("Email sent successfully");
+      setEmail("");
+      setEmailLoading(false);
+    } catch (error) {
+      console.error("Failed to send email", error);
+      toast.error("Failed to send email");
+      setEmailLoading(false);
     }
   };
 
@@ -360,19 +389,7 @@ const Hero = () => {
                   placeholder="Write your imagination"
                 />
               )}
-              <div className="flex flex-col gap-2">
-                <label htmlFor="email" className="font-bold">
-                  Email:
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                />
-              </div>
+
               <button
                 onClick={handleToggle}
                 className=" border border-violet-900 p-2 rounded-md text-black"
@@ -515,15 +532,42 @@ const Hero = () => {
             ))}
 
           {step === 3 && resultImage && (
-            <div className="flex gap-5 xl:flex-row md:flex-row sm:flex-col xs:flex-col">
-              <button
-                className="flex gap-2 items-center bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
-                onClick={startOver}
-              >
-                <Image src={start} alt="start" width={25} height={25} />
-                Start Over
-              </button>
-              <DownloadButton imageUrl={resultImage} />
+            <div className="flex flex-col gap-5 ">
+              <div className="flex gap-5 xl:flex-row md:flex-row sm:flex-col xs:flex-col">
+                <button
+                  className="flex gap-2 items-center bg-violet-500 hover:bg-violet-700 text-white font-bold py-2 px-4 border border-violet-900 rounded-lg"
+                  onClick={startOver}
+                >
+                  <Image src={start} alt="start" width={25} height={25} />
+                  Start Over
+                </button>
+                <DownloadButton imageUrl={resultImage} />
+              </div>
+              <div className="flex flex-col gap-2">
+                {/* <label htmlFor="email" className="font-bold">
+                  Email:
+                </label> */}
+                <input
+                  type="email"
+                  id="email"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 outline-violet-700"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                />
+                <button
+                  className={`flex gap-2 items-center justify-center  text-white font-bold py-2 px-4 border border-violet-900 rounded-lg ${
+                    !email
+                      ? "bg-gray-500 hover:bg-gray-600 cursor-not-allowed"
+                      : "bg-violet-500 hover:bg-violet-700"
+                  }`}
+                  type="button"
+                  disabled={!email || emailLoading}
+                  onClick={handleEmail}
+                >
+                  Send Image
+                </button>
+              </div>
             </div>
           )}
 
